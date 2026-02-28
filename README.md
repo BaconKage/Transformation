@@ -36,6 +36,11 @@ Open `http://localhost:3000`.
 - `customWorkout` (optional)
 - `customDiet` (optional)
 - additional optional fields: `gender`, `age`, `height`, `weight`, `goal`
+- optional consistency fields (for now manually entered until app history is available):
+  - `workoutDaysPerWeek` (`0`-`14`)
+  - `workoutAdherence` (`0`-`100`, percent)
+  - `dietAdherence` (`0`-`100`, percent)
+  - `weeksOnPlan` (`0`-`520`)
 
 Returns:
 

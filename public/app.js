@@ -129,9 +129,29 @@ form.addEventListener("submit", async (event) => {
   const selectedPlanId = data.get("selectedPlanId");
   const customWorkout = (data.get("customWorkout") || "").toString().trim();
   const customDiet = (data.get("customDiet") || "").toString().trim();
+  const workoutDaysPerWeek = Number((data.get("workoutDaysPerWeek") || "").toString());
+  const workoutAdherence = Number((data.get("workoutAdherence") || "").toString());
+  const dietAdherence = Number((data.get("dietAdherence") || "").toString());
+  const weeksOnPlan = Number((data.get("weeksOnPlan") || "").toString());
 
   if (!selectedPlanId && !customWorkout && !customDiet) {
     setStatus("Choose a preconfigured plan or fill a custom workout/diet plan.", true);
+    return;
+  }
+  if (!Number.isNaN(workoutDaysPerWeek) && workoutDaysPerWeek !== 0 && (workoutDaysPerWeek < 0 || workoutDaysPerWeek > 14)) {
+    setStatus("Workout days per week must be between 0 and 14.", true);
+    return;
+  }
+  if (!Number.isNaN(workoutAdherence) && workoutAdherence !== 0 && (workoutAdherence < 0 || workoutAdherence > 100)) {
+    setStatus("Workout adherence must be between 0 and 100.", true);
+    return;
+  }
+  if (!Number.isNaN(dietAdherence) && dietAdherence !== 0 && (dietAdherence < 0 || dietAdherence > 100)) {
+    setStatus("Diet adherence must be between 0 and 100.", true);
+    return;
+  }
+  if (!Number.isNaN(weeksOnPlan) && weeksOnPlan !== 0 && (weeksOnPlan < 0 || weeksOnPlan > 520)) {
+    setStatus("Weeks on plan must be between 0 and 520.", true);
     return;
   }
 

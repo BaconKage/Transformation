@@ -67,6 +67,28 @@
           <input name="goal" type="text" placeholder="e.g. lose fat and gain muscle definition" />
         </label>
 
+        <details>
+          <summary>Optional consistency inputs (until app data is integrated)</summary>
+          <div class="grid">
+            <label>
+              Workout Days / Week
+              <input name="workoutDaysPerWeek" type="number" min="0" max="14" placeholder="e.g. 4" />
+            </label>
+            <label>
+              Workout Adherence (%)
+              <input name="workoutAdherence" type="number" min="0" max="100" placeholder="e.g. 80" />
+            </label>
+            <label>
+              Diet Adherence (%)
+              <input name="dietAdherence" type="number" min="0" max="100" placeholder="e.g. 75" />
+            </label>
+            <label>
+              Weeks Already On Plan
+              <input name="weeksOnPlan" type="number" min="0" max="520" placeholder="e.g. 12" />
+            </label>
+          </div>
+        </details>
+
         <label>
           Preconfigured Plan
           <select id="selectedPlanId" name="selectedPlanId">
