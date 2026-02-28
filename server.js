@@ -53,8 +53,8 @@ function buildTransformationPrompt({
 }) {
   const stageInstruction =
     timelineStage === "one_year"
-      ? "This is a continued progression from the same person after consistent effort beyond month 6; show clear but realistic advancement over an already improved physique."
-      : "This is the first major transformation stage; show meaningful early-to-mid-term progress without extreme change.";
+      ? "Using the uploaded full-body image as base, create a realistic 1-year fitness progress projection. This must look like continued progression after month 6, with clear but believable additional improvement."
+      : "Using the uploaded full-body image as base, create a realistic 6-month fitness progress projection. Simulate moderate fat loss consistent with about 0.5-0.8% body weight loss per week over 6 months.";
 
   return [
     "Create a realistic simulated future fitness progress portrait from the provided real person photo.",
@@ -64,8 +64,14 @@ function buildTransformationPrompt({
     `Workout + Diet Plan: ${planText}.`,
     `Progress consistency context: ${progressText}.`,
     stageInstruction,
-    "Keep the same person identity, facial features, skin tone, pose framing, and background as much as possible.",
-    "Show healthy, plausible progress according to the timeline, plan, and adherence.",
+    "Identity preservation is strict: preserve face exactly, preserve skin tone exactly, preserve bone structure, preserve height and natural body proportions.",
+    "Do not change facial features. Do not change hair. Do not change ethnicity or skin tone. Do not change age. No facial enhancement. No beauty filters.",
+    "Keep the same posture, clothing style, and background. Keep pose framing and lighting as close to the original as possible.",
+    "Reduce overall body fat in a realistic way while maintaining natural fat distribution patterns.",
+    "Slightly improve muscle definition but do not exaggerate muscle size.",
+    "Do not create unrealistic six-pack abs unless body fat is very low.",
+    "Maintain natural skin texture, realistic human anatomy, and believable transformation quality.",
+    "Show healthy, plausible progress according to timeline, plan, and adherence, not an extreme fitness-model transformation.",
     "Person must remain fully clothed in a normal gym or casual outfit. No swimwear, underwear, lingerie, nudity, cleavage emphasis, or suggestive styling.",
     strictSafety
       ? "Use conservative, non-revealing clothing and avoid shirtless or skin-exposing presentation."
