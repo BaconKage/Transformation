@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ForgeForm AI</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <p class="brand-tag">My ForgeForm</p>
+      <h1>Future You, Forged.</h1>
+      <p class="sub">Upload your photo, pick your plan, and preview your 6-month and 1-year progress.</p>
+
+      <form id="previewForm" class="card">
+        <input id="photo" name="photo" type="file" accept="image/*" capture="environment" class="hidden-file" />
+        <div class="photo-block">
+          <p class="section-title">Your Photo</p>
+          <div class="photo-actions">
+            <button id="uploadBtn" type="button" class="secondary-btn">Upload Photo</button>
+            <button id="openCameraBtn" type="button" class="secondary-btn">Take Photo Now</button>
+          </div>
+          <div id="cameraWrap" class="camera-wrap hidden">
+            <video id="cameraFeed" autoplay playsinline muted></video>
+            <div class="camera-controls">
+              <button id="captureBtn" type="button">Capture</button>
+              <button id="cancelCameraBtn" type="button" class="secondary-btn">Cancel</button>
+            </div>
+          </div>
+          <div id="previewWrap" class="upload-preview hidden">
+            <p>Selected Preview</p>
+            <img id="selectedPreview" alt="Your selected photo preview" />
+          </div>
+        </div>
+        <p class="hint">
+          Use a clear full body picture. 
+        </p>
+
+        <div class="grid">
+          <label>
+            Gender
+            <input name="gender" type="text" placeholder="e.g. male/female" />
+          </label>
+          <label>
+            Age
+            <input name="age" type="number" min="10" max="100" placeholder="e.g. 26" />
+          </label>
+          <label>
+            Height
+            <input name="height" type="text" placeholder="e.g. 5'9 or 175 cm" />
+          </label>
+          <label>
+            Weight
+            <input name="weight" type="text" placeholder="e.g. 78 kg" />
+          </label>
+        </div>
+
+        <label>
+          Goal
+          <input name="goal" type="text" placeholder="e.g. lose fat and gain muscle definition" />
+        </label>
+
+        <label>
+          Preconfigured Plan
+          <select id="selectedPlanId" name="selectedPlanId">
+            <option value="">Choose one (or use custom below)</option>
+            <option value="beginner_fat_loss">Beginner Fat Loss</option>
+            <option value="lean_muscle_gain">Lean Muscle Gain</option>
+            <option value="athletic_recomp">Athletic Recomp</option>
+          </select>
+        </label>
+
+        <details>
+          <summary>Or add a custom plan</summary>
+          <label>
+            Custom Workout Plan
+            <textarea
+              name="customWorkout"
+              rows="3"
+              placeholder="e.g. 4x weekly resistance training + 2x brisk walk sessions"
+            ></textarea>
+          </label>
+          <label>
+            Custom Diet Plan
+            <textarea
+              name="customDiet"
+              rows="3"
+              placeholder="e.g. high-protein, 500 calorie deficit, 80% whole foods"
+            ></textarea>
+          </label>
+        </details>
+
+        <button id="submitBtn" type="submit">Generate Previews</button>
+      </form>
+
+      <section id="status" class="status"></section>
+
+      <section id="results" class="results hidden">
+        <article class="result-card">
+          <h2>After 6 Months</h2>
+          <img id="img6m" alt="6 month body transformation preview" />
+        </article>
+        <article class="result-card">
+          <h2>After 1 Year</h2>
+          <img id="img1y" alt="1 year body transformation preview" />
+        </article>
+      </section>
+    </main>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>
