@@ -13,9 +13,16 @@
       <p class="sub">Upload your photo, pick your plan, and preview your 6-month and 1-year progress.</p>
 
       <form id="previewForm" class="card">
-        <input id="photo" name="photo" type="file" accept="image/*" capture="environment" class="hidden-file" />
+        <input id="photo" name="photo" type="file" accept="image/*" class="hidden-file" />
         <div class="photo-block">
           <p class="section-title">Your Photo</p>
+          <div class="camera-choice">
+            <label for="cameraFacing">Camera Preference</label>
+            <select id="cameraFacing">
+              <option value="user">Selfie Camera (Front)</option>
+              <option value="environment">Back Camera</option>
+            </select>
+          </div>
           <div class="photo-actions">
             <button id="uploadBtn" type="button" class="secondary-btn">Upload Photo</button>
             <button id="openCameraBtn" type="button" class="secondary-btn">Take Photo Now</button>

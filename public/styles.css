@@ -102,6 +102,16 @@ label {
   gap: 0.65rem;
 }
 
+.camera-choice {
+  display: grid;
+  gap: 0.38rem;
+}
+
+.camera-choice label {
+  font-size: 0.86rem;
+  color: #efcfb3;
+}
+
 .photo-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;

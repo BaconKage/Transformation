@@ -9,6 +9,7 @@ const uploadBtn = document.getElementById("uploadBtn");
 const openCameraBtn = document.getElementById("openCameraBtn");
 const captureBtn = document.getElementById("captureBtn");
 const cancelCameraBtn = document.getElementById("cancelCameraBtn");
+const cameraFacing = document.getElementById("cameraFacing");
 const cameraWrap = document.getElementById("cameraWrap");
 const cameraFeed = document.getElementById("cameraFeed");
 const previewWrap = document.getElementById("previewWrap");
@@ -17,6 +18,7 @@ const selectedPreview = document.getElementById("selectedPreview");
 let cameraStream = null;
 let capturedPhotoFile = null;
 let currentPreviewUrl = "";
+let currentFacingMode = "user";
 
 function setStatus(message, isError = false) {
   statusEl.textContent = message;
@@ -41,6 +43,16 @@ async function stopCamera() {
   cameraWrap.classList.add("hidden");
 }
 
+async function startCamera(facingMode) {
+  await stopCamera();
+  cameraStream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: { ideal: facingMode } },
+    audio: false
+  });
+  cameraFeed.srcObject = cameraStream;
+  cameraWrap.classList.remove("hidden");
+}
+
 uploadBtn.addEventListener("click", () => {
   photoInput.click();
 });
@@ -60,16 +72,24 @@ openCameraBtn.addEventListener("click", async () => {
     return;
   }
   try {
-    await stopCamera();
-    cameraStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "environment" },
-      audio: false
-    });
-    cameraFeed.srcObject = cameraStream;
-    cameraWrap.classList.remove("hidden");
+    currentFacingMode = cameraFacing.value || "user";
+    await startCamera(currentFacingMode);
     setStatus("Camera opened. Tap Capture when ready.");
   } catch (error) {
     setStatus("Could not open camera. Please allow permission or use Upload Photo.", true);
+  }
+});
+
+cameraFacing.addEventListener("change", async () => {
+  currentFacingMode = cameraFacing.value || "user";
+  if (!cameraStream) {
+    return;
+  }
+  try {
+    await startCamera(currentFacingMode);
+    setStatus(`Switched to ${currentFacingMode === "user" ? "selfie" : "back"} camera.`);
+  } catch {
+    setStatus("Could not switch camera on this device.", true);
   }
 });
 
