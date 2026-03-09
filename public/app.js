@@ -4,7 +4,13 @@ const resultsEl = document.getElementById("results");
 const loadingEl = document.getElementById("loading");
 const img6m = document.getElementById("img6m");
 const img1y = document.getElementById("img1y");
+const before6m = document.getElementById("before6m");
+const before1y = document.getElementById("before1y");
 const submitBtn = document.getElementById("submitBtn");
+const compareRange6m = document.getElementById("compareRange6m");
+const compareRange1y = document.getElementById("compareRange1y");
+const compareAfterWrap6m = document.getElementById("compareAfterWrap6m");
+const compareAfterWrap1y = document.getElementById("compareAfterWrap1y");
 const photoInput = document.getElementById("photo");
 const uploadBtn = document.getElementById("uploadBtn");
 const openCameraBtn = document.getElementById("openCameraBtn");
@@ -26,6 +32,11 @@ function setStatus(message, isError = false) {
   statusEl.style.color = isError ? "#b42318" : "#4c5568";
 }
 
+function setComparePosition(rangeInput, afterWrap) {
+  const value = Number(rangeInput.value);
+  afterWrap.style.width = `${value}%`;
+}
+
 function setLoading(isLoading, message = "Generating transformation preview...") {
   if (isLoading) {
     loadingEl.classList.remove("hidden");
@@ -45,6 +56,21 @@ function setPreview(url) {
   selectedPreview.src = url;
   previewWrap.classList.remove("hidden");
 }
+
+function setBeforeAndAfterSources(after6mUrl, after1yUrl, beforeUrl) {
+  before6m.src = beforeUrl;
+  before1y.src = beforeUrl;
+  img6m.src = after6mUrl;
+  img1y.src = after1yUrl;
+}
+
+compareRange6m.addEventListener("input", () => {
+  setComparePosition(compareRange6m, compareAfterWrap6m);
+});
+
+compareRange1y.addEventListener("input", () => {
+  setComparePosition(compareRange1y, compareAfterWrap1y);
+});
 
 async function stopCamera() {
   if (cameraStream) {
@@ -177,6 +203,8 @@ form.addEventListener("submit", async (event) => {
 
   submitBtn.disabled = true;
   resultsEl.classList.add("hidden");
+  setComparePosition(compareRange6m, compareAfterWrap6m);
+  setComparePosition(compareRange1y, compareAfterWrap1y);
   setLoading(true, "Generating previews. This can take up to a minute...");
 
   try {
@@ -190,8 +218,7 @@ form.addEventListener("submit", async (event) => {
       throw new Error(payload.error || "Failed to generate previews.");
     }
 
-    img6m.src = payload.sixMonthsImage;
-    img1y.src = payload.oneYearImage;
+    setBeforeAndAfterSources(payload.sixMonthsImage, payload.oneYearImage, selectedPreview.src);
     resultsEl.classList.remove("hidden");
     setLoading(false);
     setStatus(payload.note || "Done.");

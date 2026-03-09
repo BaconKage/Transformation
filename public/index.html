@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ForgeForm AI</title>
+    <title>My FitVision</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <main class="container">
-      <p class="brand-tag">My ForgeForm</p>
-      <h1>Future You, Forged.</h1>
-      <p class="sub">Upload your photo, pick your plan, and preview your 6-month and 1-year progress.</p>
+      <p class="brand-tag">My FitVision</p>
+      <h1>My FitVision</h1>
+      <p class="sub">See your current body against your projected 6-month and 1-year versions in comparison mode.</p>
 
       <form id="previewForm" class="card">
         <input id="photo" name="photo" type="file" accept="image/*" class="hidden-file" />
@@ -132,12 +132,48 @@
 
       <section id="results" class="results hidden">
         <article class="result-card">
-          <h2>After 6 Months</h2>
-          <img id="img6m" alt="6 month body transformation preview" />
+          <h2>6-Month Comparison</h2>
+          <div class="compare-frame">
+            <img id="before6m" class="compare-image compare-image-before" alt="Current photo" />
+            <div id="compareAfterWrap6m" class="compare-after-wrap">
+              <img id="img6m" class="compare-image compare-image-after" alt="After 6 months projection" />
+            </div>
+          </div>
+          <input
+            id="compareRange6m"
+            class="compare-range"
+            type="range"
+            min="0"
+            max="100"
+            value="50"
+            aria-label="Compare before and after - 6 months"
+          />
+          <div class="compare-legend">
+            <span>Current</span>
+            <span>After 6 months</span>
+          </div>
         </article>
         <article class="result-card">
-          <h2>After 1 Year</h2>
-          <img id="img1y" alt="1 year body transformation preview" />
+          <h2>1-Year Comparison</h2>
+          <div class="compare-frame">
+            <img id="before1y" class="compare-image compare-image-before" alt="Current photo" />
+            <div id="compareAfterWrap1y" class="compare-after-wrap">
+              <img id="img1y" class="compare-image compare-image-after" alt="After 1 year projection" />
+            </div>
+          </div>
+          <input
+            id="compareRange1y"
+            class="compare-range"
+            type="range"
+            min="0"
+            max="100"
+            value="50"
+            aria-label="Compare before and after - 1 year"
+          />
+          <div class="compare-legend">
+            <span>Current</span>
+            <span>After 1 year</span>
+          </div>
         </article>
       </section>
     </main>

@@ -306,6 +306,55 @@ button:disabled {
   display: block;
 }
 
+.compare-frame {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #463024;
+  background: #090909;
+  aspect-ratio: 1 / 1;
+}
+
+.compare-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.compare-image-before {
+  position: absolute;
+  inset: 0;
+}
+
+.compare-after-wrap {
+  position: absolute;
+  inset: 0;
+  width: 50%;
+  overflow: hidden;
+}
+
+.compare-image-after {
+  width: 100%;
+  height: 100%;
+}
+
+.compare-range {
+  margin-top: 0.55rem;
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.compare-legend {
+  margin-top: 0.28rem;
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
 .hidden {
   display: none;
 }
