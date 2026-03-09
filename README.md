@@ -16,7 +16,8 @@ npm install
 Create `.env` from `.env.example` and set your key:
 
 ```env
-OPENAI_API_KEY=your_openai_api_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_IMAGE_MODEL=gemini-3-pro-image-preview
 PORT=3000
 ```
 

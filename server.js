@@ -102,21 +102,37 @@ function parseOptionalNumber(value, { min, max }) {
   return parsed;
 }
 
-async function generatePreview({ apiKey, imageBuffer, prompt }) {
-  const form = new FormData();
-  const imageBlob = new Blob([imageBuffer], { type: "image/jpeg" });
+async function generatePreview({ apiKey, imageBuffer, imageMimeType = "image/jpeg", prompt }) {
+  const model = process.env.GEMINI_IMAGE_MODEL || "gemini-3-pro-image-preview";
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+  const requestBody = {
+    contents: [
+      {
+    role: "user",
+        parts: [
+          {
+            text: prompt
+          },
+          {
+            inline_data: {
+              mime_type: imageMimeType,
+              data: imageBuffer.toString("base64")
+            }
+          }
+        ]
+      }
+    ],
+    generationConfig: {
+      responseModalities: ["IMAGE"]
+    }
+  };
 
-  form.append("model", "gpt-image-1");
-  form.append("image", imageBlob, "input.jpg");
-  form.append("prompt", prompt);
-  form.append("size", "1024x1024");
-
-  const response = await fetch("https://api.openai.com/v1/images/edits", {
+  const response = await fetch(`${endpoint}?key=${encodeURIComponent(apiKey)}`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${apiKey}`
+      "Content-Type": "application/json"
     },
-    body: form
+    body: JSON.stringify(requestBody)
   });
 
   if (!response.ok) {
@@ -127,23 +143,27 @@ async function generatePreview({ apiKey, imageBuffer, prompt }) {
     } catch {
       parsed = null;
     }
-    const error = new Error(parsed?.error?.message || errText || "OpenAI image generation failed.");
+    const error = new Error(parsed?.error?.message || errText || "Gemini image generation failed.");
     error.httpStatus = response.status;
     error.code = parsed?.error?.code;
     error.type = parsed?.error?.type;
+    error.messageDetail = parsed?.error?.message;
     throw error;
   }
 
   const data = await response.json();
-  const base64 = data?.data?.[0]?.b64_json;
+  const candidate = data?.candidates?.[0];
+  const parts = candidate?.content?.parts || [];
+  const inline = parts.find((part) => part?.inlineData?.data || part?.inline_data?.data);
+  const base64 = inline?.inlineData?.data || inline?.inline_data?.data;
   if (!base64) {
-    throw new Error("No image returned from OpenAI.");
+    throw new Error("No image returned from Gemini.");
   }
   return `data:image/png;base64,${base64}`;
 }
 
 function isSexualModerationBlock(error) {
-  return error?.code === "moderation_blocked" && /sexual/i.test(error?.message || "");
+  return /safety|sexual|image policy|policy/i.test(error?.message || "") || /safety/i.test(error?.messageDetail || "");
 }
 
 async function generatePreviewWithFallback({ apiKey, imageBuffer, normalPrompt, fallbackPrompt }) {
@@ -159,8 +179,8 @@ async function generatePreviewWithFallback({ apiKey, imageBuffer, normalPrompt, 
 
 app.post("/api/preview", upload.single("photo"), async (req, res) => {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      return res.status(500).json({ error: "OPENAI_API_KEY is missing in environment." });
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "GEMINI_API_KEY is missing in environment." });
     }
 
     if (!req.file) {
@@ -264,15 +284,17 @@ app.post("/api/preview", upload.single("photo"), async (req, res) => {
     });
 
     const sixMonthsImage = await generatePreviewWithFallback({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: process.env.GEMINI_API_KEY,
       imageBuffer: req.file.buffer,
+      imageMimeType: req.file.mimetype || "image/jpeg",
       normalPrompt: prompt6m,
       fallbackPrompt: prompt6mStrict
     });
 
     const oneYearImage = await generatePreviewWithFallback({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: process.env.GEMINI_API_KEY,
       imageBuffer: dataUrlToBuffer(sixMonthsImage),
+      imageMimeType: "image/png",
       normalPrompt: prompt1y,
       fallbackPrompt: prompt1yStrict
     });
