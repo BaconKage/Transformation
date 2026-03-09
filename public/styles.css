@@ -199,6 +199,41 @@ button:disabled {
   font-weight: 600;
 }
 
+.loading {
+  margin: 0.85rem 0 0.7rem;
+  border: 1px solid #4f3522;
+  border-radius: 14px;
+  padding: 0.8rem;
+  background: #141414;
+  color: #ffdcc0;
+  display: grid;
+  justify-items: center;
+  gap: 0.45rem;
+  text-align: center;
+}
+
+.loader-ring {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 3px solid #3f2a1c;
+  border-top-color: var(--accent);
+  border-right-color: var(--accent-2);
+  animation: spin 900ms linear infinite;
+  margin-bottom: 0.2rem;
+}
+
+.loading p {
+  margin: 0;
+  font-weight: 700;
+  color: #ffd8bc;
+}
+
+.loading-subtext {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
 .camera-wrap {
   border: 1px solid #4e341f;
   border-radius: 14px;
@@ -302,5 +337,11 @@ button:disabled {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }

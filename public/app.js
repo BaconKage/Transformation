@@ -1,6 +1,7 @@
 const form = document.getElementById("previewForm");
 const statusEl = document.getElementById("status");
 const resultsEl = document.getElementById("results");
+const loadingEl = document.getElementById("loading");
 const img6m = document.getElementById("img6m");
 const img1y = document.getElementById("img1y");
 const submitBtn = document.getElementById("submitBtn");
@@ -23,6 +24,17 @@ let currentFacingMode = "user";
 function setStatus(message, isError = false) {
   statusEl.textContent = message;
   statusEl.style.color = isError ? "#b42318" : "#4c5568";
+}
+
+function setLoading(isLoading, message = "Generating transformation preview...") {
+  if (isLoading) {
+    loadingEl.classList.remove("hidden");
+    statusEl.classList.add("hidden");
+    setStatus(message);
+  } else {
+    loadingEl.classList.add("hidden");
+    statusEl.classList.remove("hidden");
+  }
 }
 
 function setPreview(url) {
@@ -165,7 +177,7 @@ form.addEventListener("submit", async (event) => {
 
   submitBtn.disabled = true;
   resultsEl.classList.add("hidden");
-  setStatus("Generating previews. This can take up to a minute...");
+  setLoading(true, "Generating previews. This can take up to a minute...");
 
   try {
     const response = await fetch("/api/preview", {
@@ -181,10 +193,12 @@ form.addEventListener("submit", async (event) => {
     img6m.src = payload.sixMonthsImage;
     img1y.src = payload.oneYearImage;
     resultsEl.classList.remove("hidden");
+    setLoading(false);
     setStatus(payload.note || "Done.");
   } catch (error) {
     setStatus(error.message || "Something went wrong.", true);
   } finally {
+    setLoading(false);
     submitBtn.disabled = false;
   }
 });
