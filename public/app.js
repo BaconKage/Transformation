@@ -43,6 +43,16 @@ const socialAssets = {
   oneYear: null
 };
 
+function initializeView() {
+  setLoading(false);
+  resultsEl.classList.add("hidden");
+  cameraWrap.classList.add("hidden");
+  previewWrap.classList.add("hidden");
+  socialPreviewWrap6m.classList.add("hidden");
+  socialPreviewWrap1y.classList.add("hidden");
+  statusEl.textContent = "";
+}
+
 function setStatus(message, isError = false) {
   statusEl.textContent = message;
   statusEl.style.color = isError ? "#b42318" : "#4c5568";
@@ -655,3 +665,5 @@ window.addEventListener("beforeunload", () => {
     URL.revokeObjectURL(currentPreviewUrl);
   }
 });
+
+initializeView();

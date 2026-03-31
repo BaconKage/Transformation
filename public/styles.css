@@ -170,8 +170,7 @@ h1 {
   font-size: 0.93rem;
 }
 
-.hidden-file,
-.hidden {
+.hidden-file {
   display: none;
 }
 
@@ -554,6 +553,10 @@ button:disabled {
   min-width: 124px;
 }
 
+.hidden {
+  display: none !important;
+}
+
 @media (min-width: 680px) {
   .container {
     padding: 1.6rem 1.3rem 3.2rem;
@@ -594,6 +597,54 @@ button:disabled {
 
   .social-actions {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 679px) {
+  .container {
+    padding: 0.85rem 0.8rem 2.4rem;
+  }
+
+  .hero-copy,
+  .hero-panel,
+  .card,
+  .loading,
+  .result-card {
+    border-radius: 20px;
+  }
+
+  .hero-copy,
+  .hero-panel,
+  .card,
+  .result-card {
+    padding: 0.9rem;
+  }
+
+  h1 {
+    max-width: 100%;
+    font-size: clamp(1.9rem, 10vw, 2.8rem);
+  }
+
+  .photo-topbar,
+  .social-export-head,
+  .result-head,
+  .submit-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .camera-choice,
+  .social-export-head select {
+    width: 100%;
+  }
+
+  .result-chip,
+  .tip-badge {
+    width: fit-content;
+  }
+
+  .submit-row button {
+    width: 100%;
   }
 }
 
