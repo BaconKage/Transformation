@@ -171,10 +171,60 @@ function drawLabelPill(ctx, text, x, y) {
   ctx.restore();
 }
 
+function drawOutlinedCard(ctx, x, y, width, height, radius, fillStyle, strokeStyle) {
+  ctx.save();
+  ctx.fillStyle = fillStyle;
+  roundRect(ctx, x, y, width, height, radius);
+  ctx.fill();
+  ctx.strokeStyle = strokeStyle;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawBrandBadge(ctx, x, y, brandName) {
+  ctx.save();
+  const badgeWidth = 250;
+  const badgeHeight = 82;
+  const gradient = ctx.createLinearGradient(x, y, x + badgeWidth, y + badgeHeight);
+  gradient.addColorStop(0, "#ff8a2a");
+  gradient.addColorStop(1, "#ff5a1f");
+  ctx.fillStyle = gradient;
+  roundRect(ctx, x, y, badgeWidth, badgeHeight, 24);
+  ctx.fill();
+
+  ctx.fillStyle = "#fff9f3";
+  ctx.font = "800 20px Sora, Arial, sans-serif";
+  ctx.fillText("BRAND", x + 22, y + 28);
+  ctx.font = "800 34px Sora, Arial, sans-serif";
+  ctx.fillText(brandName, x + 22, y + 62);
+  ctx.restore();
+}
+
+function drawArrowConnector(ctx, x, y, width) {
+  ctx.save();
+  ctx.strokeStyle = "rgba(255, 194, 147, 0.9)";
+  ctx.lineWidth = 6;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + width, y);
+  ctx.stroke();
+
+  ctx.fillStyle = "rgba(255, 194, 147, 0.95)";
+  ctx.beginPath();
+  ctx.moveTo(x + width, y);
+  ctx.lineTo(x + width - 26, y - 16);
+  ctx.lineTo(x + width - 26, y + 16);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
 async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, format }) {
   const size = format === "story"
-    ? { width: 1080, height: 1920, imageHeight: 660, gap: 40, sidePad: 72, topPad: 120 }
-    : { width: 1080, height: 1350, imageHeight: 520, gap: 34, sidePad: 64, topPad: 88 };
+    ? { width: 1080, height: 1920, imageHeight: 700, gap: 44, sidePad: 64, topPad: 120 }
+    : { width: 1080, height: 1350, imageHeight: 560, gap: 36, sidePad: 58, topPad: 78 };
 
   const canvas = document.createElement("canvas");
   canvas.width = size.width;
@@ -183,19 +233,32 @@ async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, form
 
   fillGradientBackground(ctx, size.width, size.height);
 
-  ctx.fillStyle = "#ffd6ad";
-  ctx.font = "700 30px Sora, Arial, sans-serif";
-  ctx.fillText("MY FITVISION", size.sidePad, size.topPad - 36);
+  ctx.save();
+  ctx.globalAlpha = 0.16;
+  ctx.fillStyle = "#ff8a2a";
+  ctx.beginPath();
+  ctx.arc(size.width - 120, 130, 160, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  const outerX = 20;
+  const outerY = 20;
+  const outerWidth = size.width - 40;
+  const outerHeight = size.height - 40;
+  drawOutlinedCard(ctx, outerX, outerY, outerWidth, outerHeight, 42, "rgba(20, 11, 7, 0.7)", "rgba(255, 138, 42, 0.35)");
+
+  drawBrandBadge(ctx, size.sidePad, size.topPad - 12, "MY GYM");
 
   ctx.fillStyle = "#fff7ec";
-  ctx.font = format === "story" ? "800 76px Sora, Arial, sans-serif" : "800 64px Sora, Arial, sans-serif";
-  ctx.fillText("Transformation Preview", size.sidePad, size.topPad + 52);
+  ctx.font = format === "story" ? "800 74px Sora, Arial, sans-serif" : "800 60px Sora, Arial, sans-serif";
+  ctx.fillText("Transformation", size.sidePad, size.topPad + 132);
+  ctx.fillText("Preview", size.sidePad, size.topPad + (format === "story" ? 214 : 192));
 
-  ctx.fillStyle = "#d8bfa7";
-  ctx.font = format === "story" ? "500 36px Sora, Arial, sans-serif" : "500 30px Sora, Arial, sans-serif";
-  ctx.fillText(`Current vs projected ${timelineLabel.toLowerCase()}`, size.sidePad, size.topPad + 108);
+  ctx.fillStyle = "#f7caa7";
+  ctx.font = format === "story" ? "600 32px Sora, Arial, sans-serif" : "600 28px Sora, Arial, sans-serif";
+  ctx.fillText(`Current vs projected ${timelineLabel.toLowerCase()}`, size.sidePad, size.topPad + (format === "story" ? 272 : 236));
 
-  const cardY = size.topPad + 170;
+  const cardY = size.topPad + (format === "story" ? 340 : 290);
   const cardWidth = (size.width - size.sidePad * 2 - size.gap) / 2;
   const cardRadius = 36;
 
@@ -221,21 +284,35 @@ async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, form
   roundRect(ctx, size.sidePad + cardWidth + size.gap, cardY, cardWidth, size.imageHeight, cardRadius);
   ctx.stroke();
 
+  drawArrowConnector(ctx, size.width / 2 - 48, cardY + size.imageHeight / 2, 96);
   drawLabelPill(ctx, "NOW", size.sidePad + 24, cardY + 24);
   drawLabelPill(ctx, timelineLabel.toUpperCase(), size.sidePad + cardWidth + size.gap + 24, cardY + 24);
 
-  const footerY = cardY + size.imageHeight + (format === "story" ? 110 : 82);
-  ctx.fillStyle = "#fff7ec";
-  ctx.font = format === "story" ? "700 48px Sora, Arial, sans-serif" : "700 40px Sora, Arial, sans-serif";
-  ctx.fillText("Projected with your selected plan", size.sidePad, footerY);
+  const footerY = cardY + size.imageHeight + (format === "story" ? 72 : 54);
+  const footerHeight = format === "story" ? 300 : 220;
+  drawOutlinedCard(
+    ctx,
+    size.sidePad,
+    footerY,
+    size.width - size.sidePad * 2,
+    footerHeight,
+    34,
+    "rgba(28, 18, 12, 0.88)",
+    "rgba(255, 180, 132, 0.22)"
+  );
 
-  ctx.fillStyle = "#ccb39c";
-  ctx.font = format === "story" ? "500 30px Sora, Arial, sans-serif" : "500 26px Sora, Arial, sans-serif";
-  ctx.fillText("AI simulation for sharing. Results depend on real consistency.", size.sidePad, footerY + 56);
+  ctx.fillStyle = "#fff7ec";
+  ctx.font = format === "story" ? "700 44px Sora, Arial, sans-serif" : "700 36px Sora, Arial, sans-serif";
+  ctx.fillText("Powered by My Gym plan projection", size.sidePad + 34, footerY + 72);
+
+  ctx.fillStyle = "#d9bba0";
+  ctx.font = format === "story" ? "500 28px Sora, Arial, sans-serif" : "500 24px Sora, Arial, sans-serif";
+  ctx.fillText("Share your current look beside your projected milestone result.", size.sidePad + 34, footerY + 126);
+  ctx.fillText("AI simulation for motivation. Real outcomes depend on consistency.", size.sidePad + 34, footerY + 172);
 
   ctx.fillStyle = "#ff8a2a";
-  ctx.font = format === "story" ? "800 32px Sora, Arial, sans-serif" : "800 28px Sora, Arial, sans-serif";
-  ctx.fillText(format === "story" ? "Instagram Story Ready" : "Instagram Post Ready", size.sidePad, size.height - 82);
+  ctx.font = format === "story" ? "800 30px Sora, Arial, sans-serif" : "800 26px Sora, Arial, sans-serif";
+  ctx.fillText(format === "story" ? "Instagram Story Ready" : "Instagram Post Ready", size.sidePad + 34, footerY + footerHeight - 36);
 
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -268,7 +345,7 @@ async function renderSocialAsset({
   });
   const objectUrl = URL.createObjectURL(blob);
   const safeTimeline = timelineLabel.toLowerCase().replace(/\s+/g, "-");
-  const filename = `my-fitvision-${safeTimeline}-${formatSelect.value}.png`;
+  const filename = `my-gym-${safeTimeline}-${formatSelect.value}.png`;
 
   socialAssets[key] = {
     blob,
@@ -313,7 +390,7 @@ async function shareSocialAsset(key, timelineLabel) {
 
   await navigator.share({
     files: [file],
-    title: `My FitVision ${timelineLabel} transformation`,
+    title: `My Gym ${timelineLabel} transformation`,
     text: `Current vs projected ${timelineLabel.toLowerCase()} transformation`
   });
 }
