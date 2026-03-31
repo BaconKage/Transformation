@@ -11,6 +11,18 @@ const compareRange6m = document.getElementById("compareRange6m");
 const compareRange1y = document.getElementById("compareRange1y");
 const compareAfterWrap6m = document.getElementById("compareAfterWrap6m");
 const compareAfterWrap1y = document.getElementById("compareAfterWrap1y");
+const socialFormat6m = document.getElementById("socialFormat6m");
+const socialFormat1y = document.getElementById("socialFormat1y");
+const socialPreviewWrap6m = document.getElementById("socialPreviewWrap6m");
+const socialPreviewWrap1y = document.getElementById("socialPreviewWrap1y");
+const socialPreview6m = document.getElementById("socialPreview6m");
+const socialPreview1y = document.getElementById("socialPreview1y");
+const generateSocial6m = document.getElementById("generateSocial6m");
+const generateSocial1y = document.getElementById("generateSocial1y");
+const downloadSocial6m = document.getElementById("downloadSocial6m");
+const downloadSocial1y = document.getElementById("downloadSocial1y");
+const shareSocial6m = document.getElementById("shareSocial6m");
+const shareSocial1y = document.getElementById("shareSocial1y");
 const photoInput = document.getElementById("photo");
 const uploadBtn = document.getElementById("uploadBtn");
 const openCameraBtn = document.getElementById("openCameraBtn");
@@ -26,6 +38,10 @@ let cameraStream = null;
 let capturedPhotoFile = null;
 let currentPreviewUrl = "";
 let currentFacingMode = "user";
+const socialAssets = {
+  sixMonths: null,
+  oneYear: null
+};
 
 function setStatus(message, isError = false) {
   statusEl.textContent = message;
@@ -35,6 +51,18 @@ function setStatus(message, isError = false) {
 function setComparePosition(rangeInput, afterWrap) {
   const value = Number(rangeInput.value);
   afterWrap.style.width = `${value}%`;
+}
+
+function clearSocialAsset(key, previewEl, wrapEl, downloadBtnEl, shareBtnEl) {
+  const existing = socialAssets[key];
+  if (existing?.objectUrl) {
+    URL.revokeObjectURL(existing.objectUrl);
+  }
+  socialAssets[key] = null;
+  previewEl.removeAttribute("src");
+  wrapEl.classList.add("hidden");
+  downloadBtnEl.classList.add("hidden");
+  shareBtnEl.classList.add("hidden");
 }
 
 function setLoading(isLoading, message = "Generating transformation preview...") {
@@ -62,6 +90,232 @@ function setBeforeAndAfterSources(after6mUrl, after1yUrl, beforeUrl) {
   before1y.src = beforeUrl;
   img6m.src = after6mUrl;
   img1y.src = after1yUrl;
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Could not load image for export."));
+    image.src = src;
+  });
+}
+
+function roundRect(ctx, x, y, width, height, radius) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+}
+
+function drawCoverImage(ctx, image, x, y, width, height, radius = 0) {
+  const scale = Math.max(width / image.width, height / image.height);
+  const drawWidth = image.width * scale;
+  const drawHeight = image.height * scale;
+  const offsetX = x + (width - drawWidth) / 2;
+  const offsetY = y + (height - drawHeight) / 2;
+
+  ctx.save();
+  if (radius > 0) {
+    roundRect(ctx, x, y, width, height, radius);
+    ctx.clip();
+  }
+  ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+  ctx.restore();
+}
+
+function fillGradientBackground(ctx, width, height) {
+  const base = ctx.createLinearGradient(0, 0, width, height);
+  base.addColorStop(0, "#120c08");
+  base.addColorStop(0.52, "#25160d");
+  base.addColorStop(1, "#0d0a08");
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, width, height);
+
+  const glowLeft = ctx.createRadialGradient(width * 0.14, height * 0.12, 10, width * 0.14, height * 0.12, width * 0.42);
+  glowLeft.addColorStop(0, "rgba(255, 122, 0, 0.34)");
+  glowLeft.addColorStop(1, "rgba(255, 122, 0, 0)");
+  ctx.fillStyle = glowLeft;
+  ctx.fillRect(0, 0, width, height);
+
+  const glowRight = ctx.createRadialGradient(width * 0.84, height * 0.16, 10, width * 0.84, height * 0.16, width * 0.34);
+  glowRight.addColorStop(0, "rgba(255, 77, 0, 0.24)");
+  glowRight.addColorStop(1, "rgba(255, 77, 0, 0)");
+  ctx.fillStyle = glowRight;
+  ctx.fillRect(0, 0, width, height);
+}
+
+function drawLabelPill(ctx, text, x, y) {
+  ctx.font = "700 30px Sora, Arial, sans-serif";
+  const metrics = ctx.measureText(text);
+  const padX = 26;
+  const height = 58;
+  const width = metrics.width + padX * 2;
+  ctx.save();
+  ctx.fillStyle = "rgba(10, 10, 10, 0.8)";
+  roundRect(ctx, x, y, width, height, 29);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255, 189, 138, 0.3)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.fillStyle = "#fff6eb";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, x + padX, y + height / 2);
+  ctx.restore();
+}
+
+async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, format }) {
+  const size = format === "story"
+    ? { width: 1080, height: 1920, imageHeight: 660, gap: 40, sidePad: 72, topPad: 120 }
+    : { width: 1080, height: 1350, imageHeight: 520, gap: 34, sidePad: 64, topPad: 88 };
+
+  const canvas = document.createElement("canvas");
+  canvas.width = size.width;
+  canvas.height = size.height;
+  const ctx = canvas.getContext("2d");
+
+  fillGradientBackground(ctx, size.width, size.height);
+
+  ctx.fillStyle = "#ffd6ad";
+  ctx.font = "700 30px Sora, Arial, sans-serif";
+  ctx.fillText("MY FITVISION", size.sidePad, size.topPad - 36);
+
+  ctx.fillStyle = "#fff7ec";
+  ctx.font = format === "story" ? "800 76px Sora, Arial, sans-serif" : "800 64px Sora, Arial, sans-serif";
+  ctx.fillText("Transformation Preview", size.sidePad, size.topPad + 52);
+
+  ctx.fillStyle = "#d8bfa7";
+  ctx.font = format === "story" ? "500 36px Sora, Arial, sans-serif" : "500 30px Sora, Arial, sans-serif";
+  ctx.fillText(`Current vs projected ${timelineLabel.toLowerCase()}`, size.sidePad, size.topPad + 108);
+
+  const cardY = size.topPad + 170;
+  const cardWidth = (size.width - size.sidePad * 2 - size.gap) / 2;
+  const cardRadius = 36;
+
+  ctx.save();
+  ctx.shadowColor = "rgba(0, 0, 0, 0.26)";
+  ctx.shadowBlur = 50;
+  ctx.shadowOffsetY = 24;
+  ctx.fillStyle = "rgba(19, 15, 12, 0.92)";
+  roundRect(ctx, size.sidePad, cardY, cardWidth, size.imageHeight, cardRadius);
+  ctx.fill();
+  roundRect(ctx, size.sidePad + cardWidth + size.gap, cardY, cardWidth, size.imageHeight, cardRadius);
+  ctx.fill();
+  ctx.restore();
+
+  const [beforeImage, afterImage] = await Promise.all([loadImage(beforeSrc), loadImage(afterSrc)]);
+  drawCoverImage(ctx, beforeImage, size.sidePad, cardY, cardWidth, size.imageHeight, cardRadius);
+  drawCoverImage(ctx, afterImage, size.sidePad + cardWidth + size.gap, cardY, cardWidth, size.imageHeight, cardRadius);
+
+  ctx.strokeStyle = "rgba(255, 189, 138, 0.35)";
+  ctx.lineWidth = 3;
+  roundRect(ctx, size.sidePad, cardY, cardWidth, size.imageHeight, cardRadius);
+  ctx.stroke();
+  roundRect(ctx, size.sidePad + cardWidth + size.gap, cardY, cardWidth, size.imageHeight, cardRadius);
+  ctx.stroke();
+
+  drawLabelPill(ctx, "NOW", size.sidePad + 24, cardY + 24);
+  drawLabelPill(ctx, timelineLabel.toUpperCase(), size.sidePad + cardWidth + size.gap + 24, cardY + 24);
+
+  const footerY = cardY + size.imageHeight + (format === "story" ? 110 : 82);
+  ctx.fillStyle = "#fff7ec";
+  ctx.font = format === "story" ? "700 48px Sora, Arial, sans-serif" : "700 40px Sora, Arial, sans-serif";
+  ctx.fillText("Projected with your selected plan", size.sidePad, footerY);
+
+  ctx.fillStyle = "#ccb39c";
+  ctx.font = format === "story" ? "500 30px Sora, Arial, sans-serif" : "500 26px Sora, Arial, sans-serif";
+  ctx.fillText("AI simulation for sharing. Results depend on real consistency.", size.sidePad, footerY + 56);
+
+  ctx.fillStyle = "#ff8a2a";
+  ctx.font = format === "story" ? "800 32px Sora, Arial, sans-serif" : "800 28px Sora, Arial, sans-serif";
+  ctx.fillText(format === "story" ? "Instagram Story Ready" : "Instagram Post Ready", size.sidePad, size.height - 82);
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error("Could not create export image."));
+        return;
+      }
+      resolve(blob);
+    }, "image/png");
+  });
+}
+
+async function renderSocialAsset({
+  key,
+  beforeSrc,
+  afterSrc,
+  timelineLabel,
+  formatSelect,
+  previewEl,
+  wrapEl,
+  downloadBtnEl,
+  shareBtnEl
+}) {
+  clearSocialAsset(key, previewEl, wrapEl, downloadBtnEl, shareBtnEl);
+  const blob = await createSocialComparison({
+    beforeSrc,
+    afterSrc,
+    timelineLabel,
+    format: formatSelect.value
+  });
+  const objectUrl = URL.createObjectURL(blob);
+  const safeTimeline = timelineLabel.toLowerCase().replace(/\s+/g, "-");
+  const filename = `my-fitvision-${safeTimeline}-${formatSelect.value}.png`;
+
+  socialAssets[key] = {
+    blob,
+    objectUrl,
+    filename
+  };
+
+  previewEl.src = objectUrl;
+  wrapEl.classList.remove("hidden");
+  downloadBtnEl.classList.remove("hidden");
+  shareBtnEl.classList.toggle("hidden", !(navigator.share && navigator.canShare));
+}
+
+function downloadSocialAsset(key) {
+  const asset = socialAssets[key];
+  if (!asset) {
+    setStatus("Create the Instagram-ready image first.", true);
+    return;
+  }
+  const anchor = document.createElement("a");
+  anchor.href = asset.objectUrl;
+  anchor.download = asset.filename;
+  anchor.click();
+}
+
+async function shareSocialAsset(key, timelineLabel) {
+  const asset = socialAssets[key];
+  if (!asset) {
+    setStatus("Create the Instagram-ready image first.", true);
+    return;
+  }
+  if (!navigator.share || !navigator.canShare) {
+    setStatus("Share is not available here. Download the image and post it on Instagram.", true);
+    return;
+  }
+
+  const file = new File([asset.blob], asset.filename, { type: "image/png" });
+  if (!navigator.canShare({ files: [file] })) {
+    setStatus("Sharing this file is not supported on this device. Download it instead.", true);
+    return;
+  }
+
+  await navigator.share({
+    files: [file],
+    title: `My FitVision ${timelineLabel} transformation`,
+    text: `Current vs projected ${timelineLabel.toLowerCase()} transformation`
+  });
 }
 
 compareRange6m.addEventListener("input", () => {
@@ -160,6 +414,90 @@ cancelCameraBtn.addEventListener("click", async () => {
   await stopCamera();
 });
 
+generateSocial6m.addEventListener("click", async () => {
+  if (!before6m.src || !img6m.src) {
+    setStatus("Generate previews first.", true);
+    return;
+  }
+  try {
+    setStatus("Creating Instagram-ready 6-month comparison...");
+    await renderSocialAsset({
+      key: "sixMonths",
+      beforeSrc: before6m.src,
+      afterSrc: img6m.src,
+      timelineLabel: "6 Months",
+      formatSelect: socialFormat6m,
+      previewEl: socialPreview6m,
+      wrapEl: socialPreviewWrap6m,
+      downloadBtnEl: downloadSocial6m,
+      shareBtnEl: shareSocial6m
+    });
+    setStatus("6-month Instagram image is ready.");
+  } catch (error) {
+    setStatus(error.message || "Could not create Instagram-ready image.", true);
+  }
+});
+
+generateSocial1y.addEventListener("click", async () => {
+  if (!before1y.src || !img1y.src) {
+    setStatus("Generate previews first.", true);
+    return;
+  }
+  try {
+    setStatus("Creating Instagram-ready 1-year comparison...");
+    await renderSocialAsset({
+      key: "oneYear",
+      beforeSrc: before1y.src,
+      afterSrc: img1y.src,
+      timelineLabel: "1 Year",
+      formatSelect: socialFormat1y,
+      previewEl: socialPreview1y,
+      wrapEl: socialPreviewWrap1y,
+      downloadBtnEl: downloadSocial1y,
+      shareBtnEl: shareSocial1y
+    });
+    setStatus("1-year Instagram image is ready.");
+  } catch (error) {
+    setStatus(error.message || "Could not create Instagram-ready image.", true);
+  }
+});
+
+socialFormat6m.addEventListener("change", () => {
+  clearSocialAsset("sixMonths", socialPreview6m, socialPreviewWrap6m, downloadSocial6m, shareSocial6m);
+});
+
+socialFormat1y.addEventListener("change", () => {
+  clearSocialAsset("oneYear", socialPreview1y, socialPreviewWrap1y, downloadSocial1y, shareSocial1y);
+});
+
+downloadSocial6m.addEventListener("click", () => {
+  downloadSocialAsset("sixMonths");
+});
+
+downloadSocial1y.addEventListener("click", () => {
+  downloadSocialAsset("oneYear");
+});
+
+shareSocial6m.addEventListener("click", async () => {
+  try {
+    await shareSocialAsset("sixMonths", "6 Months");
+  } catch (error) {
+    if (error?.name !== "AbortError") {
+      setStatus(error.message || "Could not share the image.", true);
+    }
+  }
+});
+
+shareSocial1y.addEventListener("click", async () => {
+  try {
+    await shareSocialAsset("oneYear", "1 Year");
+  } catch (error) {
+    if (error?.name !== "AbortError") {
+      setStatus(error.message || "Could not share the image.", true);
+    }
+  }
+});
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
@@ -203,6 +541,8 @@ form.addEventListener("submit", async (event) => {
 
   submitBtn.disabled = true;
   resultsEl.classList.add("hidden");
+  clearSocialAsset("sixMonths", socialPreview6m, socialPreviewWrap6m, downloadSocial6m, shareSocial6m);
+  clearSocialAsset("oneYear", socialPreview1y, socialPreviewWrap1y, downloadSocial1y, shareSocial1y);
   setComparePosition(compareRange6m, compareAfterWrap6m);
   setComparePosition(compareRange1y, compareAfterWrap1y);
   setLoading(true, "Generating previews. This can take up to a minute...");
@@ -232,6 +572,8 @@ form.addEventListener("submit", async (event) => {
 
 window.addEventListener("beforeunload", () => {
   stopCamera();
+  clearSocialAsset("sixMonths", socialPreview6m, socialPreviewWrap6m, downloadSocial6m, shareSocial6m);
+  clearSocialAsset("oneYear", socialPreview1y, socialPreviewWrap1y, downloadSocial1y, shareSocial1y);
   if (currentPreviewUrl && currentPreviewUrl.startsWith("blob:")) {
     URL.revokeObjectURL(currentPreviewUrl);
   }
