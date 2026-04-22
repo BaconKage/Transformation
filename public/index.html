@@ -11,25 +11,23 @@
       <section class="hero">
         <div class="hero-copy">
           <p class="brand-tag">My Gym</p>
-          <h1>Preview your transformation before you commit to the grind.</h1>
-          <p class="sub">
-            Build a realistic side-by-side projection from your current photo, then export it as an Instagram-ready story or post.
-          </p>
+          <h1>Visualize your next transformation.</h1>
+          <p class="sub">Create a realistic progress preview from one photo and a few quick choices.</p>
         </div>
         <aside class="hero-panel">
-          <p class="hero-panel-kicker">Quick flow</p>
+          <p class="hero-panel-kicker">Start here</p>
           <div class="hero-steps">
             <div class="hero-step">
               <span>1</span>
-              <p>Upload or capture a clear full-body photo</p>
+              <p>Add photo</p>
             </div>
             <div class="hero-step">
               <span>2</span>
-              <p>Add your goal, plan, and consistency details</p>
+              <p>Pick goal</p>
             </div>
             <div class="hero-step">
               <span>3</span>
-              <p>Compare 6-month and 1-year projections</p>
+              <p>See result</p>
             </div>
           </div>
         </aside>
@@ -41,7 +39,6 @@
             <p class="section-eyebrow">Step 1</p>
             <h2 class="section-heading">Add your current photo</h2>
           </div>
-          <p class="section-copy">Use a front-facing full-body image in normal lighting for the best projection quality.</p>
         </section>
 
         <input id="photo" name="photo" type="file" accept="image/*" class="hidden-file" />
@@ -59,154 +56,193 @@
           </div>
 
           <div class="photo-actions">
-            <button id="uploadBtn" type="button" class="secondary-btn">Upload Photo</button>
-            <button id="openCameraBtn" type="button" class="secondary-btn">Take Photo Now</button>
+            <button id="uploadBtn" type="button" class="secondary-btn action-btn">
+              <span class="action-icon">UP</span>
+              <strong>Upload</strong>
+            </button>
+            <button id="openCameraBtn" type="button" class="secondary-btn action-btn">
+              <span class="action-icon">CAM</span>
+              <strong>Camera</strong>
+            </button>
           </div>
 
           <div id="cameraWrap" class="camera-wrap hidden">
             <video id="cameraFeed" autoplay playsinline muted></video>
             <div class="camera-controls">
-              <button id="captureBtn" type="button">Capture</button>
+              <button id="captureBtn" type="button">Use Photo</button>
               <button id="cancelCameraBtn" type="button" class="secondary-btn">Cancel</button>
             </div>
           </div>
 
           <div id="previewWrap" class="upload-preview hidden">
-            <p>Selected preview</p>
+            <p>Selected photo</p>
             <img id="selectedPreview" alt="Your selected photo preview" />
           </div>
         </div>
 
         <div class="hint-row">
-          <p class="hint">Best results come from a neutral pose, visible limbs, normal clothes, and a simple background.</p>
-          <div class="tip-badge">Full-body photos work best</div>
+          <p class="hint">Use a clear, full-body photo in everyday lighting.</p>
+          <div class="tip-badge">Best front-facing</div>
         </div>
 
         <section class="form-section">
           <div>
             <p class="section-eyebrow">Step 2</p>
-            <h2 class="section-heading">Tell us about the user</h2>
+            <h2 class="section-heading">Your basics</h2>
           </div>
-          <p class="section-copy">These details help the preview look specific to the person instead of generic.</p>
         </section>
 
         <div class="grid">
           <label class="field-card">
             <span>Gender</span>
-            <input name="gender" type="text" placeholder="e.g. male/female" />
+            <select name="gender">
+              <option value="">Choose</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="not specified">Prefer not to say</option>
+            </select>
           </label>
           <label class="field-card">
             <span>Age</span>
-            <input name="age" type="number" min="10" max="100" placeholder="e.g. 26" />
+            <input name="age" type="number" inputmode="numeric" min="10" max="100" placeholder="26" />
           </label>
           <label class="field-card">
             <span>Height</span>
-            <input name="height" type="text" placeholder="e.g. 5'9 or 175 cm" />
+            <input name="height" type="text" inputmode="decimal" placeholder="175 cm" />
           </label>
           <label class="field-card">
             <span>Weight</span>
-            <input name="weight" type="text" placeholder="e.g. 78 kg" />
+            <input name="weight" type="text" inputmode="decimal" placeholder="78 kg" />
           </label>
         </div>
-
-        <label class="field-card field-card-wide">
-          <span>Goal</span>
-          <input name="goal" type="text" placeholder="e.g. lose fat and gain muscle definition" />
-        </label>
-
-        <details class="expand-card">
-          <summary>Optional consistency inputs</summary>
-          <p class="details-copy">Use these if you already know how regularly the plan is being followed.</p>
-          <div class="grid">
-            <label class="field-card">
-              <span>Workout Days / Week</span>
-              <input name="workoutDaysPerWeek" type="number" min="0" max="14" placeholder="e.g. 4" />
-            </label>
-            <label class="field-card">
-              <span>Workout Adherence (%)</span>
-              <input name="workoutAdherence" type="number" min="0" max="100" placeholder="e.g. 80" />
-            </label>
-            <label class="field-card">
-              <span>Diet Adherence (%)</span>
-              <input name="dietAdherence" type="number" min="0" max="100" placeholder="e.g. 75" />
-            </label>
-            <label class="field-card">
-              <span>Weeks Already On Plan</span>
-              <input name="weeksOnPlan" type="number" min="0" max="520" placeholder="e.g. 12" />
-            </label>
-          </div>
-        </details>
 
         <section class="form-section">
           <div>
             <p class="section-eyebrow">Step 3</p>
-            <h2 class="section-heading">Choose the plan</h2>
+            <h2 class="section-heading">Choose your goal</h2>
           </div>
-          <p class="section-copy">Pick a preset transformation path or add your own custom workout and diet description.</p>
         </section>
 
+        <div class="choice-grid goal-choice-grid">
+          <button type="button" class="choice-card goal-choice" data-goal="lose fat and get leaner">
+            <strong>Lose fat</strong>
+            <span>Lean down</span>
+          </button>
+          <button type="button" class="choice-card goal-choice" data-goal="gain lean muscle">
+            <strong>Gain muscle</strong>
+            <span>Build size</span>
+          </button>
+          <button type="button" class="choice-card goal-choice" data-goal="lose fat and gain muscle definition">
+            <strong>Recomp</strong>
+            <span>Lean + toned</span>
+          </button>
+        </div>
+
         <label class="field-card field-card-wide">
-          <span>Preconfigured Plan</span>
-          <select id="selectedPlanId" name="selectedPlanId">
-            <option value="">Choose one (or use custom below)</option>
-            <option value="beginner_fat_loss">Beginner Fat Loss</option>
-            <option value="lean_muscle_gain">Lean Muscle Gain</option>
-            <option value="athletic_recomp">Athletic Recomp</option>
-          </select>
+          <span>Goal note</span>
+          <input id="goalInput" name="goal" type="text" placeholder="Choose above or add your own" />
         </label>
 
-        <div class="plan-pills" aria-hidden="true">
-          <span>Fat loss</span>
-          <span>Muscle gain</span>
-          <span>Recomp</span>
+        <section class="form-section">
+          <div>
+            <p class="section-eyebrow">Step 4</p>
+            <h2 class="section-heading">Choose your plan</h2>
+          </div>
+        </section>
+
+        <select id="selectedPlanId" name="selectedPlanId" class="hidden-select" aria-label="Selected plan">
+          <option value="">Choose one</option>
+          <option value="beginner_fat_loss">Beginner Fat Loss</option>
+          <option value="lean_muscle_gain">Lean Muscle Gain</option>
+          <option value="athletic_recomp">Athletic Recomp</option>
+        </select>
+
+        <div class="choice-grid plan-choice-grid">
+          <button type="button" class="choice-card plan-choice" data-plan="beginner_fat_loss">
+            <strong>Fat loss</strong>
+            <span>Strength + cardio</span>
+          </button>
+          <button type="button" class="choice-card plan-choice" data-plan="lean_muscle_gain">
+            <strong>Muscle</strong>
+            <span>Hypertrophy</span>
+          </button>
+          <button type="button" class="choice-card plan-choice" data-plan="athletic_recomp">
+            <strong>Athletic</strong>
+            <span>Strength + conditioning</span>
+          </button>
         </div>
 
         <details class="expand-card">
-          <summary>Or add a custom plan</summary>
-          <p class="details-copy">Use this if you want the preview to reflect a very specific training style or diet approach.</p>
+          <summary>Use my own plan</summary>
           <label class="field-card field-card-wide">
-            <span>Custom Workout Plan</span>
-            <textarea
-              name="customWorkout"
-              rows="3"
-              placeholder="e.g. 4x weekly resistance training + 2x brisk walk sessions"
-            ></textarea>
+            <span>Workout</span>
+            <textarea name="customWorkout" rows="3" placeholder="4x resistance training + 2 walks"></textarea>
           </label>
           <label class="field-card field-card-wide">
-            <span>Custom Diet Plan</span>
-            <textarea
-              name="customDiet"
-              rows="3"
-              placeholder="e.g. high-protein, 500 calorie deficit, 80% whole foods"
-            ></textarea>
+            <span>Diet</span>
+            <textarea name="customDiet" rows="3" placeholder="High protein, calorie deficit, whole foods"></textarea>
           </label>
+        </details>
+
+        <details class="expand-card">
+          <summary>Add consistency details</summary>
+          <div class="grid compact-grid">
+            <label class="field-card">
+              <span>Days / week</span>
+              <input name="workoutDaysPerWeek" type="number" inputmode="numeric" min="0" max="14" placeholder="4" />
+            </label>
+            <label class="field-card">
+            <span>Workout consistency</span>
+              <input name="workoutAdherence" type="number" inputmode="numeric" min="0" max="100" placeholder="80%" />
+            </label>
+            <label class="field-card">
+            <span>Diet consistency</span>
+              <input name="dietAdherence" type="number" inputmode="numeric" min="0" max="100" placeholder="75%" />
+            </label>
+            <label class="field-card">
+              <span>Weeks done</span>
+              <input name="weeksOnPlan" type="number" inputmode="numeric" min="0" max="520" placeholder="8" />
+            </label>
+          </div>
         </details>
 
         <div class="submit-row">
           <div class="submit-copy">
-            <p class="submit-title">Generate the preview</p>
-            <p class="submit-text">You’ll get interactive before/after comparisons plus a ready-to-post My Gym export.</p>
+            <p class="submit-title">Create your preview</p>
+            <p class="submit-text">See both milestones side by side.</p>
           </div>
-          <button id="submitBtn" type="submit">Generate Previews</button>
+          <button id="submitBtn" type="submit">Create Preview</button>
         </div>
       </form>
 
       <section id="loading" class="loading hidden">
         <div class="loader-ring" aria-hidden="true"></div>
-        <p>Building your transformation previews...</p>
-        <p class="loading-subtext">This usually takes 30-60 seconds. Please stay on this page.</p>
+        <p>Creating your transformation...</p>
+        <p class="loading-subtext">This can take about a minute.</p>
       </section>
 
       <section id="status" class="status"></section>
+
+      <section id="transformationData" class="transformation-data hidden">
+        <div class="transformation-head">
+          <div>
+            <p class="result-kicker">Progress Estimate</p>
+            <h2>Your projected changes</h2>
+          </div>
+          <div class="result-chip">Personalized</div>
+        </div>
+        <p id="transformationSummary" class="transformation-summary"></p>
+        <div id="metricsGrid" class="metrics-grid"></div>
+      </section>
 
       <section id="results" class="results hidden">
         <article class="result-card">
           <div class="result-head">
             <div>
               <p class="result-kicker">Milestone</p>
-              <h2>6-Month Comparison</h2>
+              <h2>6-Month Preview</h2>
             </div>
-            <div class="result-chip">Swipe to compare</div>
+            <div class="result-chip">Compare</div>
           </div>
           <div class="compare-frame">
             <img id="before6m" class="compare-image compare-image-before" alt="Current photo" />
@@ -214,24 +250,16 @@
               <img id="img6m" class="compare-image compare-image-after" alt="After 6 months projection" />
             </div>
           </div>
-          <input
-            id="compareRange6m"
-            class="compare-range"
-            type="range"
-            min="0"
-            max="100"
-            value="50"
-            aria-label="Compare before and after - 6 months"
-          />
+          <input id="compareRange6m" class="compare-range" type="range" min="0" max="100" value="50" aria-label="Compare before and after - 6 months" />
           <div class="compare-legend">
             <span>Current</span>
-            <span>After 6 months</span>
+            <span>6 months</span>
           </div>
           <div class="social-export">
             <div class="social-export-head">
               <div>
-                <p>Instagram Export</p>
-                <span>Turn this milestone into a polished social asset</span>
+                <p>Share Result</p>
+                <span>Create a polished story or post</span>
               </div>
               <select id="socialFormat6m" aria-label="Instagram format for 6-month result">
                 <option value="story">Story</option>
@@ -242,7 +270,7 @@
               <img id="socialPreview6m" class="social-preview" alt="Instagram-ready 6-month comparison" />
             </div>
             <div class="social-actions">
-              <button type="button" id="generateSocial6m" class="secondary-btn">Create Ready-to-Post Image</button>
+              <button type="button" id="generateSocial6m" class="secondary-btn">Create Post</button>
               <button type="button" id="downloadSocial6m" class="secondary-btn hidden">Download</button>
               <button type="button" id="shareSocial6m" class="secondary-btn hidden">Share</button>
             </div>
@@ -253,9 +281,9 @@
           <div class="result-head">
             <div>
               <p class="result-kicker">Milestone</p>
-              <h2>1-Year Comparison</h2>
+              <h2>1-Year Preview</h2>
             </div>
-            <div class="result-chip">Swipe to compare</div>
+            <div class="result-chip">Compare</div>
           </div>
           <div class="compare-frame">
             <img id="before1y" class="compare-image compare-image-before" alt="Current photo" />
@@ -263,24 +291,16 @@
               <img id="img1y" class="compare-image compare-image-after" alt="After 1 year projection" />
             </div>
           </div>
-          <input
-            id="compareRange1y"
-            class="compare-range"
-            type="range"
-            min="0"
-            max="100"
-            value="50"
-            aria-label="Compare before and after - 1 year"
-          />
+          <input id="compareRange1y" class="compare-range" type="range" min="0" max="100" value="50" aria-label="Compare before and after - 1 year" />
           <div class="compare-legend">
             <span>Current</span>
-            <span>After 1 year</span>
+            <span>1 year</span>
           </div>
           <div class="social-export">
             <div class="social-export-head">
               <div>
-                <p>Instagram Export</p>
-                <span>Turn this milestone into a polished social asset</span>
+                <p>Share Result</p>
+                <span>Create a polished story or post</span>
               </div>
               <select id="socialFormat1y" aria-label="Instagram format for 1-year result">
                 <option value="story">Story</option>
@@ -291,7 +311,7 @@
               <img id="socialPreview1y" class="social-preview" alt="Instagram-ready 1-year comparison" />
             </div>
             <div class="social-actions">
-              <button type="button" id="generateSocial1y" class="secondary-btn">Create Ready-to-Post Image</button>
+              <button type="button" id="generateSocial1y" class="secondary-btn">Create Post</button>
               <button type="button" id="downloadSocial1y" class="secondary-btn hidden">Download</button>
               <button type="button" id="shareSocial1y" class="secondary-btn hidden">Share</button>
             </div>

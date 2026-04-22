@@ -2,6 +2,9 @@ const form = document.getElementById("previewForm");
 const statusEl = document.getElementById("status");
 const resultsEl = document.getElementById("results");
 const loadingEl = document.getElementById("loading");
+const transformationDataEl = document.getElementById("transformationData");
+const transformationSummaryEl = document.getElementById("transformationSummary");
+const metricsGridEl = document.getElementById("metricsGrid");
 const img6m = document.getElementById("img6m");
 const img1y = document.getElementById("img1y");
 const before6m = document.getElementById("before6m");
@@ -33,6 +36,10 @@ const cameraWrap = document.getElementById("cameraWrap");
 const cameraFeed = document.getElementById("cameraFeed");
 const previewWrap = document.getElementById("previewWrap");
 const selectedPreview = document.getElementById("selectedPreview");
+const selectedPlanIdInput = document.getElementById("selectedPlanId");
+const goalInput = document.getElementById("goalInput");
+const planChoiceButtons = document.querySelectorAll(".plan-choice");
+const goalChoiceButtons = document.querySelectorAll(".goal-choice");
 
 let cameraStream = null;
 let capturedPhotoFile = null;
@@ -46,11 +53,93 @@ const socialAssets = {
 function initializeView() {
   setLoading(false);
   resultsEl.classList.add("hidden");
+  transformationDataEl.classList.add("hidden");
   cameraWrap.classList.add("hidden");
   previewWrap.classList.add("hidden");
   socialPreviewWrap6m.classList.add("hidden");
   socialPreviewWrap1y.classList.add("hidden");
   statusEl.textContent = "";
+  syncPlanChoiceState();
+  syncGoalChoiceState();
+}
+
+function setSelectedButton(buttons, selectedButton) {
+  buttons.forEach((button) => {
+    button.classList.toggle("is-selected", button === selectedButton);
+  });
+}
+
+function syncPlanChoiceState() {
+  const selected = Array.from(planChoiceButtons).find((button) => button.dataset.plan === selectedPlanIdInput.value);
+  setSelectedButton(planChoiceButtons, selected || null);
+}
+
+function syncGoalChoiceState() {
+  const selected = Array.from(goalChoiceButtons).find((button) => button.dataset.goal === goalInput.value);
+  setSelectedButton(goalChoiceButtons, selected || null);
+}
+
+function formatMetricValue(value, suffix = "") {
+  if (value === undefined || value === null || value === "") {
+    return "N/A";
+  }
+  return `${value}${suffix}`;
+}
+
+function renderTransformationData(payload) {
+  const metrics = payload.metricsUsed;
+  if (!metrics) {
+    transformationDataEl.classList.add("hidden");
+    transformationSummaryEl.textContent = "";
+    metricsGridEl.innerHTML = "";
+    return;
+  }
+
+  const sixMonths = metrics.six_months || {};
+  const oneYear = metrics.one_year || {};
+  const projectionGroups = [
+    ["6 months", sixMonths],
+    ["1 year", oneYear]
+  ];
+
+  transformationSummaryEl.textContent = "Built from your photo, goal, plan, and consistency details.";
+  metricsGridEl.innerHTML = "";
+  for (const [title, groupMetrics] of projectionGroups) {
+    const group = document.createElement("section");
+    group.className = "metric-group";
+
+    const heading = document.createElement("h3");
+    heading.textContent = title;
+
+    const list = document.createElement("div");
+    list.className = "metric-list";
+
+    const metricRows = [
+      ["Fat loss", formatMetricValue(groupMetrics.fat_loss_kg, " kg")],
+      ["Muscle gain", formatMetricValue(groupMetrics.muscle_gain_kg, " kg")],
+      ["Body fat", formatMetricValue(groupMetrics.body_fat_percent_change, "%")],
+      ["Fitness score", `${formatMetricValue(groupMetrics.overall_fitness_score, "")}/100`]
+    ];
+
+    for (const [label, value] of metricRows) {
+      const card = document.createElement("div");
+      card.className = "metric-card";
+
+      const labelEl = document.createElement("span");
+      labelEl.textContent = label;
+
+      const valueEl = document.createElement("strong");
+      valueEl.textContent = value;
+
+      card.append(labelEl, valueEl);
+      list.appendChild(card);
+    }
+
+    group.append(heading, list);
+    metricsGridEl.appendChild(group);
+  }
+
+  transformationDataEl.classList.remove("hidden");
 }
 
 function setStatus(message, isError = false) {
@@ -75,7 +164,7 @@ function clearSocialAsset(key, previewEl, wrapEl, downloadBtnEl, shareBtnEl) {
   shareBtnEl.classList.add("hidden");
 }
 
-function setLoading(isLoading, message = "Generating transformation preview...") {
+function setLoading(isLoading, message = "Creating your transformation...") {
   if (isLoading) {
     loadingEl.classList.remove("hidden");
     statusEl.classList.add("hidden");
@@ -313,12 +402,12 @@ async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, form
 
   ctx.fillStyle = "#fff7ec";
   ctx.font = format === "story" ? "700 44px Sora, Arial, sans-serif" : "700 36px Sora, Arial, sans-serif";
-  ctx.fillText("Powered by My Gym plan projection", size.sidePad + 34, footerY + 72);
+  ctx.fillText("Powered by My Gym transformation preview", size.sidePad + 34, footerY + 72);
 
   ctx.fillStyle = "#d9bba0";
   ctx.font = format === "story" ? "500 28px Sora, Arial, sans-serif" : "500 24px Sora, Arial, sans-serif";
   ctx.fillText("Share your current look beside your projected milestone result.", size.sidePad + 34, footerY + 126);
-  ctx.fillText("AI simulation for motivation. Real outcomes depend on consistency.", size.sidePad + 34, footerY + 172);
+  ctx.fillText("A personalized visual estimate. Real progress depends on consistency.", size.sidePad + 34, footerY + 172);
 
   ctx.fillStyle = "#ff8a2a";
   ctx.font = format === "story" ? "800 30px Sora, Arial, sans-serif" : "800 26px Sora, Arial, sans-serif";
@@ -372,7 +461,7 @@ async function renderSocialAsset({
 function downloadSocialAsset(key) {
   const asset = socialAssets[key];
   if (!asset) {
-    setStatus("Create the Instagram-ready image first.", true);
+    setStatus("Create the share image first.", true);
     return;
   }
   const anchor = document.createElement("a");
@@ -384,7 +473,7 @@ function downloadSocialAsset(key) {
 async function shareSocialAsset(key, timelineLabel) {
   const asset = socialAssets[key];
   if (!asset) {
-    setStatus("Create the Instagram-ready image first.", true);
+    setStatus("Create the share image first.", true);
     return;
   }
   if (!navigator.share || !navigator.canShare) {
@@ -453,7 +542,7 @@ openCameraBtn.addEventListener("click", async () => {
   try {
     currentFacingMode = cameraFacing.value || "user";
     await startCamera(currentFacingMode);
-    setStatus("Camera opened. Tap Capture when ready.");
+    setStatus("Camera is ready. Tap Use Photo when it looks good.");
   } catch (error) {
     setStatus("Could not open camera. Please allow permission or use Upload Photo.", true);
   }
@@ -494,20 +583,37 @@ captureBtn.addEventListener("click", async () => {
   photoInput.value = "";
   await stopCamera();
   setPreview(URL.createObjectURL(capturedPhotoFile));
-  setStatus("Photo captured successfully.");
+    setStatus("Photo added.");
 });
 
 cancelCameraBtn.addEventListener("click", async () => {
   await stopCamera();
 });
 
+planChoiceButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedPlanIdInput.value = button.dataset.plan || "";
+    syncPlanChoiceState();
+  });
+});
+
+goalChoiceButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    goalInput.value = button.dataset.goal || "";
+    syncGoalChoiceState();
+  });
+});
+
+selectedPlanIdInput.addEventListener("change", syncPlanChoiceState);
+goalInput.addEventListener("input", syncGoalChoiceState);
+
 generateSocial6m.addEventListener("click", async () => {
   if (!before6m.src || !img6m.src) {
-    setStatus("Generate previews first.", true);
+    setStatus("Create your preview first.", true);
     return;
   }
   try {
-    setStatus("Creating Instagram-ready 6-month comparison...");
+    setStatus("Creating your 6-month share image...");
     await renderSocialAsset({
       key: "sixMonths",
       beforeSrc: before6m.src,
@@ -519,19 +625,19 @@ generateSocial6m.addEventListener("click", async () => {
       downloadBtnEl: downloadSocial6m,
       shareBtnEl: shareSocial6m
     });
-    setStatus("6-month Instagram image is ready.");
+    setStatus("6-month share image is ready.");
   } catch (error) {
-    setStatus(error.message || "Could not create Instagram-ready image.", true);
+    setStatus(error.message || "Could not create the share image.", true);
   }
 });
 
 generateSocial1y.addEventListener("click", async () => {
   if (!before1y.src || !img1y.src) {
-    setStatus("Generate previews first.", true);
+    setStatus("Create your preview first.", true);
     return;
   }
   try {
-    setStatus("Creating Instagram-ready 1-year comparison...");
+    setStatus("Creating your 1-year share image...");
     await renderSocialAsset({
       key: "oneYear",
       beforeSrc: before1y.src,
@@ -543,9 +649,9 @@ generateSocial1y.addEventListener("click", async () => {
       downloadBtnEl: downloadSocial1y,
       shareBtnEl: shareSocial1y
     });
-    setStatus("1-year Instagram image is ready.");
+    setStatus("1-year share image is ready.");
   } catch (error) {
-    setStatus(error.message || "Could not create Instagram-ready image.", true);
+    setStatus(error.message || "Could not create the share image.", true);
   }
 });
 
@@ -598,7 +704,7 @@ form.addEventListener("submit", async (event) => {
   const weeksOnPlan = Number((data.get("weeksOnPlan") || "").toString());
 
   if (!selectedPlanId && !customWorkout && !customDiet) {
-    setStatus("Choose a preconfigured plan or fill a custom workout/diet plan.", true);
+    setStatus("Choose a plan or add your own workout and diet.", true);
     return;
   }
   if (!Number.isNaN(workoutDaysPerWeek) && workoutDaysPerWeek !== 0 && (workoutDaysPerWeek < 0 || workoutDaysPerWeek > 14)) {
@@ -628,11 +734,12 @@ form.addEventListener("submit", async (event) => {
 
   submitBtn.disabled = true;
   resultsEl.classList.add("hidden");
+  transformationDataEl.classList.add("hidden");
   clearSocialAsset("sixMonths", socialPreview6m, socialPreviewWrap6m, downloadSocial6m, shareSocial6m);
   clearSocialAsset("oneYear", socialPreview1y, socialPreviewWrap1y, downloadSocial1y, shareSocial1y);
   setComparePosition(compareRange6m, compareAfterWrap6m);
   setComparePosition(compareRange1y, compareAfterWrap1y);
-  setLoading(true, "Generating previews. This can take up to a minute...");
+  setLoading(true, "Creating your transformation. This can take about a minute...");
 
   try {
     const response = await fetch("/api/preview", {
@@ -642,13 +749,16 @@ form.addEventListener("submit", async (event) => {
 
     const payload = await response.json();
     if (!response.ok) {
-      throw new Error(payload.error || "Failed to generate previews.");
+      throw new Error(payload.error || "Could not create your preview.");
     }
 
-    setBeforeAndAfterSources(payload.sixMonthsImage, payload.oneYearImage, selectedPreview.src);
-    resultsEl.classList.remove("hidden");
+    renderTransformationData(payload);
+    if (payload.sixMonthsImage && payload.oneYearImage) {
+      setBeforeAndAfterSources(payload.sixMonthsImage, payload.oneYearImage, selectedPreview.src);
+      resultsEl.classList.remove("hidden");
+    }
     setLoading(false);
-    setStatus(payload.note || "Done.");
+    setStatus(payload.note || "Your preview is ready.");
   } catch (error) {
     setStatus(error.message || "Something went wrong.", true);
   } finally {

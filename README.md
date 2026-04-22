@@ -49,9 +49,26 @@ Returns:
 {
   "sixMonthsImage": "data:image/png;base64,...",
   "oneYearImage": "data:image/png;base64,...",
+  "transformationSummary": "6 months: projected ...",
+  "metricsUsed": {
+    "six_months": {
+      "fat_loss_kg": 3.8,
+      "muscle_gain_kg": 1.1,
+      "body_fat_percent_change": -4.2,
+      "overall_fitness_score": 76
+    },
+    "one_year": {
+      "fat_loss_kg": 7.6,
+      "muscle_gain_kg": 2.3,
+      "body_fat_percent_change": -8.4,
+      "overall_fitness_score": 100
+    }
+  },
   "note": "AI output is a simulation, not a guaranteed real-world outcome."
 }
 ```
+
+The API now builds deterministic transformation data before Gemini rendering. The server logs the transformation score, body map, and final structured Gemini prompt for explainability.
 
 ## Important
 - This is a visual simulation, not medical advice or a guaranteed result.
