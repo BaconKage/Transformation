@@ -241,9 +241,13 @@
           <div class="result-head">
             <div>
               <p class="result-kicker">Timeline</p>
-              <h2>Tap to view larger</h2>
+              <h2>Current, 6 months, 1 year</h2>
             </div>
             <div class="result-chip">Current to 1 year</div>
+          </div>
+          <div class="result-stage">
+            <img id="resultStageImage" alt="Selected transformation stage" />
+            <p id="resultStageTitle">Current</p>
           </div>
           <div class="timeline-strip" aria-label="Transformation timeline">
             <button type="button" class="timeline-thumb" data-view-stage="current">
@@ -259,9 +263,29 @@
               <span>1 year</span>
             </button>
           </div>
+          <div class="social-export unified-export">
+            <div class="social-export-head">
+              <div>
+                <p>Instagram Export</p>
+                <span id="unifiedExportHint">Create a post from the selected timeline stage</span>
+              </div>
+              <select id="resultSocialFormat" aria-label="Instagram format for selected result">
+                <option value="story">Story</option>
+                <option value="post">Post</option>
+              </select>
+            </div>
+            <div class="social-preview-wrap hidden" id="socialPreviewWrapSelected">
+              <img id="socialPreviewSelected" class="social-preview" alt="Instagram-ready selected comparison" />
+            </div>
+            <div class="social-actions">
+              <button type="button" id="generateSocialSelected" class="secondary-btn">Design Post</button>
+              <button type="button" id="downloadSocialSelected" class="secondary-btn hidden">Save PNG</button>
+              <button type="button" id="shareSocialSelected" class="secondary-btn hidden">Share</button>
+            </div>
+          </div>
         </article>
 
-        <article class="result-card">
+        <article class="result-card legacy-result-card">
           <div class="result-head">
             <div>
               <p class="result-kicker">Milestone</p>
@@ -302,7 +326,7 @@
           </div>
         </article>
 
-        <article class="result-card">
+        <article class="result-card legacy-result-card">
           <div class="result-head">
             <div>
               <p class="result-kicker">Milestone</p>
