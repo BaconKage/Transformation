@@ -34,182 +34,183 @@
       </section>
 
       <form id="previewForm" class="card">
-        <section class="form-section">
-          <div>
-            <p class="section-eyebrow">Step 1</p>
-            <h2 class="section-heading">Add your current photo</h2>
+        <section class="zen-panel composer-grid">
+          <div class="form-section">
+            <p class="section-eyebrow">Input</p>
+            <h2 class="section-heading">A clear photo and quiet details.</h2>
+            <p class="section-copy">Keep the input simple. The preview is built from your image, goal, and plan.</p>
+          </div>
+
+          <div class="photo-block">
+            <input id="photo" name="photo" type="file" accept="image/*" class="hidden-file" />
+            <div class="photo-topbar">
+              <p class="section-title">Current photo</p>
+              <div class="camera-choice">
+                <label for="cameraFacing">Camera</label>
+                <select id="cameraFacing">
+                  <option value="user">Front</option>
+                  <option value="environment">Back</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="photo-actions">
+              <button id="uploadBtn" type="button" class="secondary-btn action-btn">
+                <span class="action-icon">UP</span>
+                <strong>Upload</strong>
+              </button>
+              <button id="openCameraBtn" type="button" class="secondary-btn action-btn">
+                <span class="action-icon">CAM</span>
+                <strong>Camera</strong>
+              </button>
+            </div>
+
+            <div id="cameraWrap" class="camera-wrap hidden">
+              <video id="cameraFeed" autoplay playsinline muted></video>
+              <div class="camera-controls">
+                <button id="captureBtn" type="button">Use Photo</button>
+                <button id="cancelCameraBtn" type="button" class="secondary-btn">Cancel</button>
+              </div>
+            </div>
+
+            <div id="previewWrap" class="upload-preview hidden">
+              <p>Selected photo</p>
+              <img id="selectedPreview" alt="Your selected photo preview" />
+            </div>
+
+            <div class="hint-row">
+              <p class="hint">Clear full-body photo. Natural light. Calm background.</p>
+              <div class="tip-badge">Front-facing</div>
+            </div>
           </div>
         </section>
 
-        <input id="photo" name="photo" type="file" accept="image/*" class="hidden-file" />
+        <section class="zen-panel composer-grid">
+          <div class="form-section">
+            <p class="section-eyebrow">Profile</p>
+            <h2 class="section-heading">Only what helps the estimate.</h2>
+            <p class="section-copy profile-helper">Enter height in cm and weight in kg. If you use pounds, write it clearly, like 170 lb.</p>
+          </div>
 
-        <div class="photo-block">
-          <div class="photo-topbar">
-            <p class="section-title">Current photo</p>
-            <div class="camera-choice">
-              <label for="cameraFacing">Camera</label>
-              <select id="cameraFacing">
-                <option value="user">Front</option>
-                <option value="environment">Back</option>
+          <div class="grid">
+            <label class="field-card">
+              <span>Gender</span>
+              <select name="gender">
+                <option value="">Choose</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="not specified">Prefer not to say</option>
               </select>
-            </div>
-          </div>
-
-          <div class="photo-actions">
-            <button id="uploadBtn" type="button" class="secondary-btn action-btn">
-              <span class="action-icon">UP</span>
-              <strong>Upload</strong>
-            </button>
-            <button id="openCameraBtn" type="button" class="secondary-btn action-btn">
-              <span class="action-icon">CAM</span>
-              <strong>Camera</strong>
-            </button>
-          </div>
-
-          <div id="cameraWrap" class="camera-wrap hidden">
-            <video id="cameraFeed" autoplay playsinline muted></video>
-            <div class="camera-controls">
-              <button id="captureBtn" type="button">Use Photo</button>
-              <button id="cancelCameraBtn" type="button" class="secondary-btn">Cancel</button>
-            </div>
-          </div>
-
-          <div id="previewWrap" class="upload-preview hidden">
-            <p>Selected photo</p>
-            <img id="selectedPreview" alt="Your selected photo preview" />
-          </div>
-        </div>
-
-        <div class="hint-row">
-          <p class="hint">Use a clear, full-body photo in everyday lighting.</p>
-          <div class="tip-badge">Best front-facing</div>
-        </div>
-
-        <section class="form-section">
-          <div>
-            <p class="section-eyebrow">Step 2</p>
-            <h2 class="section-heading">Your basics</h2>
+            </label>
+            <label class="field-card">
+              <span>Age</span>
+              <input name="age" type="number" inputmode="numeric" min="10" max="100" placeholder="26" />
+            </label>
+            <label class="field-card">
+              <span>Height</span>
+              <input name="height" type="text" inputmode="decimal" placeholder="175 cm" />
+            </label>
+            <label class="field-card">
+              <span>Weight</span>
+              <input name="weight" type="text" inputmode="decimal" placeholder="78 kg" />
+            </label>
           </div>
         </section>
 
-        <div class="grid">
-          <label class="field-card">
-            <span>Gender</span>
-            <select name="gender">
-              <option value="">Choose</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="not specified">Prefer not to say</option>
+        <section class="zen-panel composer-grid">
+          <div class="form-section">
+            <p class="section-eyebrow">Direction</p>
+            <h2 class="section-heading">Choose the path.</h2>
+            <p class="section-copy direction-helper">First choose your visual goal. Then choose the plan style that should guide the estimate.</p>
+          </div>
+
+          <div class="path-controls">
+            <div class="choice-label">Visual goal</div>
+            <div class="choice-grid goal-choice-grid">
+              <button type="button" class="choice-card goal-choice" data-goal="lose fat and get leaner">
+                <strong>Lose fat</strong>
+                <span>Lean down</span>
+              </button>
+              <button type="button" class="choice-card goal-choice" data-goal="gain lean muscle">
+                <strong>Gain muscle</strong>
+                <span>Build size</span>
+              </button>
+              <button type="button" class="choice-card goal-choice" data-goal="lose fat and gain muscle definition">
+                <strong>Recomp</strong>
+                <span>Lean + toned</span>
+              </button>
+            </div>
+
+            <label class="field-card field-card-wide">
+              <span>Goal note</span>
+              <input id="goalInput" name="goal" type="text" placeholder="Choose above or add your own" />
+            </label>
+
+            <select id="selectedPlanId" name="selectedPlanId" class="hidden-select" aria-label="Selected plan">
+              <option value="">Choose one</option>
+              <option value="beginner_fat_loss">Beginner Fat Loss</option>
+              <option value="lean_muscle_gain">Lean Muscle Gain</option>
+              <option value="athletic_recomp">Athletic Recomp</option>
             </select>
-          </label>
-          <label class="field-card">
-            <span>Age</span>
-            <input name="age" type="number" inputmode="numeric" min="10" max="100" placeholder="26" />
-          </label>
-          <label class="field-card">
-            <span>Height</span>
-            <input name="height" type="text" inputmode="decimal" placeholder="175 cm" />
-          </label>
-          <label class="field-card">
-            <span>Weight</span>
-            <input name="weight" type="text" inputmode="decimal" placeholder="78 kg" />
-          </label>
-        </div>
 
-        <section class="form-section">
-          <div>
-            <p class="section-eyebrow">Step 3</p>
-            <h2 class="section-heading">Choose your goal</h2>
+            <div class="choice-label">Plan style</div>
+            <div class="choice-grid plan-choice-grid">
+              <button type="button" class="choice-card plan-choice" data-plan="beginner_fat_loss">
+                <strong>Fat loss</strong>
+                <span>Strength + cardio</span>
+              </button>
+              <button type="button" class="choice-card plan-choice" data-plan="lean_muscle_gain">
+                <strong>Muscle</strong>
+                <span>Hypertrophy</span>
+              </button>
+              <button type="button" class="choice-card plan-choice" data-plan="athletic_recomp">
+                <strong>Athletic</strong>
+                <span>Strength + conditioning</span>
+              </button>
+            </div>
           </div>
         </section>
 
-        <div class="choice-grid goal-choice-grid">
-          <button type="button" class="choice-card goal-choice" data-goal="lose fat and get leaner">
-            <strong>Lose fat</strong>
-            <span>Lean down</span>
-          </button>
-          <button type="button" class="choice-card goal-choice" data-goal="gain lean muscle">
-            <strong>Gain muscle</strong>
-            <span>Build size</span>
-          </button>
-          <button type="button" class="choice-card goal-choice" data-goal="lose fat and gain muscle definition">
-            <strong>Recomp</strong>
-            <span>Lean + toned</span>
-          </button>
+        <div class="optional-grid">
+          <details class="expand-card">
+            <summary>Use my own plan</summary>
+            <label class="field-card field-card-wide">
+              <span>Workout</span>
+              <textarea name="customWorkout" rows="3" placeholder="4x resistance training + 2 walks"></textarea>
+            </label>
+            <label class="field-card field-card-wide">
+              <span>Diet</span>
+              <textarea name="customDiet" rows="3" placeholder="High protein, calorie deficit, whole foods"></textarea>
+            </label>
+          </details>
+
+          <details class="expand-card">
+            <summary>Add consistency details</summary>
+            <div class="grid compact-grid">
+              <label class="field-card">
+                <span>Days / week</span>
+                <input name="workoutDaysPerWeek" type="number" inputmode="numeric" min="0" max="14" placeholder="4" />
+              </label>
+              <label class="field-card">
+                <span>Workout consistency</span>
+                <input name="workoutAdherence" type="number" inputmode="numeric" min="0" max="100" placeholder="80%" />
+              </label>
+              <label class="field-card">
+                <span>Diet consistency</span>
+                <input name="dietAdherence" type="number" inputmode="numeric" min="0" max="100" placeholder="75%" />
+              </label>
+              <label class="field-card">
+                <span>Weeks done</span>
+                <input name="weeksOnPlan" type="number" inputmode="numeric" min="0" max="520" placeholder="8" />
+              </label>
+            </div>
+          </details>
         </div>
-
-        <label class="field-card field-card-wide">
-          <span>Goal note</span>
-          <input id="goalInput" name="goal" type="text" placeholder="Choose above or add your own" />
-        </label>
-
-        <section class="form-section">
-          <div>
-            <p class="section-eyebrow">Step 4</p>
-            <h2 class="section-heading">Choose your plan</h2>
-          </div>
-        </section>
-
-        <select id="selectedPlanId" name="selectedPlanId" class="hidden-select" aria-label="Selected plan">
-          <option value="">Choose one</option>
-          <option value="beginner_fat_loss">Beginner Fat Loss</option>
-          <option value="lean_muscle_gain">Lean Muscle Gain</option>
-          <option value="athletic_recomp">Athletic Recomp</option>
-        </select>
-
-        <div class="choice-grid plan-choice-grid">
-          <button type="button" class="choice-card plan-choice" data-plan="beginner_fat_loss">
-            <strong>Fat loss</strong>
-            <span>Strength + cardio</span>
-          </button>
-          <button type="button" class="choice-card plan-choice" data-plan="lean_muscle_gain">
-            <strong>Muscle</strong>
-            <span>Hypertrophy</span>
-          </button>
-          <button type="button" class="choice-card plan-choice" data-plan="athletic_recomp">
-            <strong>Athletic</strong>
-            <span>Strength + conditioning</span>
-          </button>
-        </div>
-
-        <details class="expand-card">
-          <summary>Use my own plan</summary>
-          <label class="field-card field-card-wide">
-            <span>Workout</span>
-            <textarea name="customWorkout" rows="3" placeholder="4x resistance training + 2 walks"></textarea>
-          </label>
-          <label class="field-card field-card-wide">
-            <span>Diet</span>
-            <textarea name="customDiet" rows="3" placeholder="High protein, calorie deficit, whole foods"></textarea>
-          </label>
-        </details>
-
-        <details class="expand-card">
-          <summary>Add consistency details</summary>
-          <div class="grid compact-grid">
-            <label class="field-card">
-              <span>Days / week</span>
-              <input name="workoutDaysPerWeek" type="number" inputmode="numeric" min="0" max="14" placeholder="4" />
-            </label>
-            <label class="field-card">
-            <span>Workout consistency</span>
-              <input name="workoutAdherence" type="number" inputmode="numeric" min="0" max="100" placeholder="80%" />
-            </label>
-            <label class="field-card">
-            <span>Diet consistency</span>
-              <input name="dietAdherence" type="number" inputmode="numeric" min="0" max="100" placeholder="75%" />
-            </label>
-            <label class="field-card">
-              <span>Weeks done</span>
-              <input name="weeksOnPlan" type="number" inputmode="numeric" min="0" max="520" placeholder="8" />
-            </label>
-          </div>
-        </details>
 
         <div class="submit-row">
           <div class="submit-copy">
             <p class="submit-title">Create your preview</p>
-            <p class="submit-text">See both milestones side by side.</p>
+            <p class="submit-text">Two milestones, one restrained comparison.</p>
           </div>
           <button id="submitBtn" type="submit">Create Preview</button>
         </div>
@@ -258,8 +259,8 @@
           <div class="social-export">
             <div class="social-export-head">
               <div>
-                <p>Share Result</p>
-                <span>Create a polished story or post</span>
+                <p>Instagram Export</p>
+                <span>Generate a polished story or feed post</span>
               </div>
               <select id="socialFormat6m" aria-label="Instagram format for 6-month result">
                 <option value="story">Story</option>
@@ -270,8 +271,8 @@
               <img id="socialPreview6m" class="social-preview" alt="Instagram-ready 6-month comparison" />
             </div>
             <div class="social-actions">
-              <button type="button" id="generateSocial6m" class="secondary-btn">Create Post</button>
-              <button type="button" id="downloadSocial6m" class="secondary-btn hidden">Download</button>
+              <button type="button" id="generateSocial6m" class="secondary-btn">Design Post</button>
+              <button type="button" id="downloadSocial6m" class="secondary-btn hidden">Save PNG</button>
               <button type="button" id="shareSocial6m" class="secondary-btn hidden">Share</button>
             </div>
           </div>
@@ -299,8 +300,8 @@
           <div class="social-export">
             <div class="social-export-head">
               <div>
-                <p>Share Result</p>
-                <span>Create a polished story or post</span>
+                <p>Instagram Export</p>
+                <span>Generate a polished story or feed post</span>
               </div>
               <select id="socialFormat1y" aria-label="Instagram format for 1-year result">
                 <option value="story">Story</option>
@@ -311,8 +312,8 @@
               <img id="socialPreview1y" class="social-preview" alt="Instagram-ready 1-year comparison" />
             </div>
             <div class="social-actions">
-              <button type="button" id="generateSocial1y" class="secondary-btn">Create Post</button>
-              <button type="button" id="downloadSocial1y" class="secondary-btn hidden">Download</button>
+              <button type="button" id="generateSocial1y" class="secondary-btn">Design Post</button>
+              <button type="button" id="downloadSocial1y" class="secondary-btn hidden">Save PNG</button>
               <button type="button" id="shareSocial1y" class="secondary-btn hidden">Share</button>
             </div>
           </div>

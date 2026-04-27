@@ -232,23 +232,24 @@ function drawCoverImage(ctx, image, x, y, width, height, radius = 0) {
 
 function fillGradientBackground(ctx, width, height) {
   const base = ctx.createLinearGradient(0, 0, width, height);
-  base.addColorStop(0, "#120c08");
-  base.addColorStop(0.52, "#25160d");
-  base.addColorStop(1, "#0d0a08");
+  base.addColorStop(0, "#050505");
+  base.addColorStop(0.52, "#11100e");
+  base.addColorStop(1, "#070604");
   ctx.fillStyle = base;
   ctx.fillRect(0, 0, width, height);
 
-  const glowLeft = ctx.createRadialGradient(width * 0.14, height * 0.12, 10, width * 0.14, height * 0.12, width * 0.42);
-  glowLeft.addColorStop(0, "rgba(255, 122, 0, 0.34)");
-  glowLeft.addColorStop(1, "rgba(255, 122, 0, 0)");
+  const glowLeft = ctx.createRadialGradient(width * 0.12, height * 0.1, 10, width * 0.12, height * 0.1, width * 0.48);
+  glowLeft.addColorStop(0, "rgba(201, 107, 34, 0.2)");
+  glowLeft.addColorStop(1, "rgba(201, 107, 34, 0)");
   ctx.fillStyle = glowLeft;
   ctx.fillRect(0, 0, width, height);
 
-  const glowRight = ctx.createRadialGradient(width * 0.84, height * 0.16, 10, width * 0.84, height * 0.16, width * 0.34);
-  glowRight.addColorStop(0, "rgba(255, 77, 0, 0.24)");
-  glowRight.addColorStop(1, "rgba(255, 77, 0, 0)");
+  const glowRight = ctx.createRadialGradient(width * 0.88, height * 0.18, 10, width * 0.88, height * 0.18, width * 0.38);
+  glowRight.addColorStop(0, "rgba(241, 135, 45, 0.12)");
+  glowRight.addColorStop(1, "rgba(241, 135, 45, 0)");
   ctx.fillStyle = glowRight;
   ctx.fillRect(0, 0, width, height);
+
 }
 
 function drawLabelPill(ctx, text, x, y) {
@@ -283,26 +284,27 @@ function drawOutlinedCard(ctx, x, y, width, height, radius, fillStyle, strokeSty
 
 function drawBrandBadge(ctx, x, y, brandName) {
   ctx.save();
-  const badgeWidth = 250;
+  const badgeWidth = 252;
   const badgeHeight = 82;
-  const gradient = ctx.createLinearGradient(x, y, x + badgeWidth, y + badgeHeight);
-  gradient.addColorStop(0, "#ff8a2a");
-  gradient.addColorStop(1, "#ff5a1f");
-  ctx.fillStyle = gradient;
+  ctx.fillStyle = "rgba(201, 107, 34, 0.14)";
   roundRect(ctx, x, y, badgeWidth, badgeHeight, 24);
   ctx.fill();
+  ctx.strokeStyle = "rgba(241, 135, 45, 0.48)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
 
-  ctx.fillStyle = "#fff9f3";
-  ctx.font = "800 20px Sora, Arial, sans-serif";
-  ctx.fillText("BRAND", x + 22, y + 28);
+  ctx.fillStyle = "rgba(245, 239, 230, 0.72)";
+  ctx.font = "800 18px Sora, Arial, sans-serif";
+  ctx.fillText("FIT CHECK", x + 22, y + 29);
   ctx.font = "800 34px Sora, Arial, sans-serif";
-  ctx.fillText(brandName, x + 22, y + 62);
+  ctx.fillStyle = "#f5efe6";
+  ctx.fillText(brandName, x + 22, y + 66);
   ctx.restore();
 }
 
 function drawArrowConnector(ctx, x, y, width) {
   ctx.save();
-  ctx.strokeStyle = "rgba(255, 194, 147, 0.9)";
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.92)";
   ctx.lineWidth = 6;
   ctx.lineCap = "round";
   ctx.beginPath();
@@ -310,7 +312,7 @@ function drawArrowConnector(ctx, x, y, width) {
   ctx.lineTo(x + width, y);
   ctx.stroke();
 
-  ctx.fillStyle = "rgba(255, 194, 147, 0.95)";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.96)";
   ctx.beginPath();
   ctx.moveTo(x + width, y);
   ctx.lineTo(x + width - 26, y - 16);
@@ -320,10 +322,34 @@ function drawArrowConnector(ctx, x, y, width) {
   ctx.restore();
 }
 
+function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 3) {
+  const words = text.split(" ");
+  let line = "";
+  let lineCount = 0;
+
+  for (const word of words) {
+    const testLine = line ? `${line} ${word}` : word;
+    if (ctx.measureText(testLine).width > maxWidth && line) {
+      ctx.fillText(line, x, y + lineCount * lineHeight);
+      line = word;
+      lineCount += 1;
+      if (lineCount >= maxLines) {
+        return;
+      }
+    } else {
+      line = testLine;
+    }
+  }
+
+  if (line && lineCount < maxLines) {
+    ctx.fillText(line, x, y + lineCount * lineHeight);
+  }
+}
+
 async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, format }) {
   const size = format === "story"
-    ? { width: 1080, height: 1920, imageHeight: 700, gap: 44, sidePad: 64, topPad: 120 }
-    : { width: 1080, height: 1350, imageHeight: 560, gap: 36, sidePad: 58, topPad: 78 };
+    ? { width: 1080, height: 1920, imageHeight: 760, gap: 34, sidePad: 58, topPad: 108 }
+    : { width: 1080, height: 1350, imageHeight: 590, gap: 30, sidePad: 52, topPad: 64 };
 
   const canvas = document.createElement("canvas");
   canvas.width = size.width;
@@ -332,40 +358,31 @@ async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, form
 
   fillGradientBackground(ctx, size.width, size.height);
 
-  ctx.save();
-  ctx.globalAlpha = 0.16;
-  ctx.fillStyle = "#ff8a2a";
-  ctx.beginPath();
-  ctx.arc(size.width - 120, 130, 160, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-
   const outerX = 20;
   const outerY = 20;
   const outerWidth = size.width - 40;
   const outerHeight = size.height - 40;
-  drawOutlinedCard(ctx, outerX, outerY, outerWidth, outerHeight, 42, "rgba(20, 11, 7, 0.7)", "rgba(255, 138, 42, 0.35)");
+  drawOutlinedCard(ctx, outerX, outerY, outerWidth, outerHeight, 42, "rgba(8, 8, 7, 0.62)", "rgba(245, 239, 230, 0.16)");
 
   drawBrandBadge(ctx, size.sidePad, size.topPad - 12, "MY GYM");
 
-  ctx.fillStyle = "#fff7ec";
-  ctx.font = format === "story" ? "800 74px Sora, Arial, sans-serif" : "800 60px Sora, Arial, sans-serif";
-  ctx.fillText("Transformation", size.sidePad, size.topPad + 132);
-  ctx.fillText("Preview", size.sidePad, size.topPad + (format === "story" ? 214 : 192));
+  ctx.fillStyle = "#f5efe6";
+  ctx.font = format === "story" ? "900 82px Sora, Arial, sans-serif" : "900 64px Sora, Arial, sans-serif";
+  ctx.fillText("Quiet progress.", size.sidePad, size.topPad + 150);
 
-  ctx.fillStyle = "#f7caa7";
-  ctx.font = format === "story" ? "600 32px Sora, Arial, sans-serif" : "600 28px Sora, Arial, sans-serif";
-  ctx.fillText(`Current vs projected ${timelineLabel.toLowerCase()}`, size.sidePad, size.topPad + (format === "story" ? 272 : 236));
+  ctx.fillStyle = "#a8a096";
+  ctx.font = format === "story" ? "600 34px Sora, Arial, sans-serif" : "600 28px Sora, Arial, sans-serif";
+  ctx.fillText(`Current vs projected ${timelineLabel.toLowerCase()} progress`, size.sidePad, size.topPad + (format === "story" ? 208 : 198));
 
-  const cardY = size.topPad + (format === "story" ? 340 : 290);
+  const cardY = size.topPad + (format === "story" ? 300 : 258);
   const cardWidth = (size.width - size.sidePad * 2 - size.gap) / 2;
-  const cardRadius = 36;
+  const cardRadius = 32;
 
   ctx.save();
-  ctx.shadowColor = "rgba(0, 0, 0, 0.26)";
-  ctx.shadowBlur = 50;
-  ctx.shadowOffsetY = 24;
-  ctx.fillStyle = "rgba(19, 15, 12, 0.92)";
+  ctx.shadowColor = "rgba(0, 0, 0, 0.38)";
+  ctx.shadowBlur = 58;
+  ctx.shadowOffsetY = 26;
+  ctx.fillStyle = "rgba(17, 16, 14, 0.92)";
   roundRect(ctx, size.sidePad, cardY, cardWidth, size.imageHeight, cardRadius);
   ctx.fill();
   roundRect(ctx, size.sidePad + cardWidth + size.gap, cardY, cardWidth, size.imageHeight, cardRadius);
@@ -376,7 +393,7 @@ async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, form
   drawCoverImage(ctx, beforeImage, size.sidePad, cardY, cardWidth, size.imageHeight, cardRadius);
   drawCoverImage(ctx, afterImage, size.sidePad + cardWidth + size.gap, cardY, cardWidth, size.imageHeight, cardRadius);
 
-  ctx.strokeStyle = "rgba(255, 189, 138, 0.35)";
+  ctx.strokeStyle = "rgba(245, 239, 230, 0.24)";
   ctx.lineWidth = 3;
   roundRect(ctx, size.sidePad, cardY, cardWidth, size.imageHeight, cardRadius);
   ctx.stroke();
@@ -388,7 +405,7 @@ async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, form
   drawLabelPill(ctx, timelineLabel.toUpperCase(), size.sidePad + cardWidth + size.gap + 24, cardY + 24);
 
   const footerY = cardY + size.imageHeight + (format === "story" ? 72 : 54);
-  const footerHeight = format === "story" ? 300 : 220;
+  const footerHeight = format === "story" ? 300 : 218;
   drawOutlinedCard(
     ctx,
     size.sidePad,
@@ -396,22 +413,29 @@ async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, form
     size.width - size.sidePad * 2,
     footerHeight,
     34,
-    "rgba(28, 18, 12, 0.88)",
-    "rgba(255, 180, 132, 0.22)"
+    "rgba(17, 16, 14, 0.82)",
+    "rgba(245, 239, 230, 0.16)"
   );
 
-  ctx.fillStyle = "#fff7ec";
+  ctx.fillStyle = "#f5efe6";
   ctx.font = format === "story" ? "700 44px Sora, Arial, sans-serif" : "700 36px Sora, Arial, sans-serif";
-  ctx.fillText("Powered by My Gym transformation preview", size.sidePad + 34, footerY + 72);
+  ctx.fillText("Transformation preview", size.sidePad + 34, footerY + 72);
 
-  ctx.fillStyle = "#d9bba0";
+  ctx.fillStyle = "#a8a096";
   ctx.font = format === "story" ? "500 28px Sora, Arial, sans-serif" : "500 24px Sora, Arial, sans-serif";
-  ctx.fillText("Share your current look beside your projected milestone result.", size.sidePad + 34, footerY + 126);
-  ctx.fillText("A personalized visual estimate. Real progress depends on consistency.", size.sidePad + 34, footerY + 172);
+  drawWrappedText(
+    ctx,
+    "A personalized visual estimate. Real progress depends on consistency, training, nutrition, and recovery.",
+    size.sidePad + 34,
+    footerY + 126,
+    size.width - size.sidePad * 2 - 68,
+    format === "story" ? 42 : 34,
+    2
+  );
 
-  ctx.fillStyle = "#ff8a2a";
+  ctx.fillStyle = "#f1872d";
   ctx.font = format === "story" ? "800 30px Sora, Arial, sans-serif" : "800 26px Sora, Arial, sans-serif";
-  ctx.fillText(format === "story" ? "Instagram Story Ready" : "Instagram Post Ready", size.sidePad + 34, footerY + footerHeight - 36);
+  ctx.fillText(format === "story" ? "READY FOR STORIES" : "READY FOR THE FEED", size.sidePad + 34, footerY + footerHeight - 36);
 
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -467,7 +491,13 @@ function downloadSocialAsset(key) {
   const anchor = document.createElement("a");
   anchor.href = asset.objectUrl;
   anchor.download = asset.filename;
+  anchor.rel = "noopener";
+  anchor.style.display = "none";
+  document.body.appendChild(anchor);
   anchor.click();
+  window.setTimeout(() => {
+    anchor.remove();
+  }, 0);
 }
 
 async function shareSocialAsset(key, timelineLabel) {
