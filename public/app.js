@@ -37,6 +37,7 @@ const unifiedExportHint = document.getElementById("unifiedExportHint");
 const socialPreviewWrapSelected = document.getElementById("socialPreviewWrapSelected");
 const socialPreviewSelected = document.getElementById("socialPreviewSelected");
 const generateSocialSelected = document.getElementById("generateSocialSelected");
+const saveSocialSelected = document.getElementById("saveSocialSelected");
 const downloadSocialSelected = document.getElementById("downloadSocialSelected");
 const shareSocialSelected = document.getElementById("shareSocialSelected");
 const imageViewer = document.getElementById("imageViewer");
@@ -44,6 +45,13 @@ const imageViewerImg = document.getElementById("imageViewerImg");
 const imageViewerTitle = document.getElementById("imageViewerTitle");
 const closeImageViewer = document.getElementById("closeImageViewer");
 const viewerTabButtons = document.querySelectorAll(".viewer-tab");
+const exportSheet = document.getElementById("exportSheet");
+const exportSheetPreview = document.getElementById("exportSheetPreview");
+const exportSheetSubtitle = document.getElementById("exportSheetSubtitle");
+const closeExportSheet = document.getElementById("closeExportSheet");
+const sheetDownloadBtn = document.getElementById("sheetDownloadBtn");
+const sheetInstagramBtn = document.getElementById("sheetInstagramBtn");
+const sheetShareBtn = document.getElementById("sheetShareBtn");
 const photoInput = document.getElementById("photo");
 const uploadBtn = document.getElementById("uploadBtn");
 const openCameraBtn = document.getElementById("openCameraBtn");
@@ -86,12 +94,14 @@ function initializeView() {
   setLoading(false);
   resultsEl.classList.add("hidden");
   imageViewer.classList.add("hidden");
+  exportSheet.classList.add("hidden");
   transformationDataEl.classList.add("hidden");
   cameraWrap.classList.add("hidden");
   previewWrap.classList.add("hidden");
   socialPreviewWrap6m.classList.add("hidden");
   socialPreviewWrap1y.classList.add("hidden");
   socialPreviewWrapSelected.classList.add("hidden");
+  saveSocialSelected.classList.add("hidden");
   statusEl.textContent = "";
   syncPlanChoiceState();
   syncGoalChoiceState();
@@ -132,18 +142,29 @@ function renderTransformationData(payload) {
   const sixMonths = metrics.six_months || {};
   const oneYear = metrics.one_year || {};
   const projectionGroups = [
-    ["6 months", sixMonths],
-    ["1 year", oneYear]
+    ["6 months", sixMonths, "Near-term"],
+    ["1 year", oneYear, "Long-term"]
   ];
 
-  transformationSummaryEl.textContent = "Built from your photo, goal, plan, and consistency details.";
+  transformationSummaryEl.textContent = "A quick estimate of how your body composition could trend over time.";
   metricsGridEl.innerHTML = "";
-  for (const [title, groupMetrics] of projectionGroups) {
+  for (const [title, groupMetrics, label] of projectionGroups) {
     const group = document.createElement("section");
     group.className = "metric-group";
 
-    const heading = document.createElement("h3");
-    heading.textContent = title;
+    const heading = document.createElement("div");
+    heading.className = "metric-group-head";
+
+    const eyebrow = document.createElement("span");
+    eyebrow.textContent = label;
+
+    const headingTitle = document.createElement("h3");
+    headingTitle.textContent = title;
+
+    const score = document.createElement("strong");
+    score.textContent = `${formatMetricValue(groupMetrics.overall_fitness_score, "")}/100`;
+
+    heading.append(eyebrow, headingTitle, score);
 
     const list = document.createElement("div");
     list.className = "metric-list";
@@ -152,7 +173,7 @@ function renderTransformationData(payload) {
       ["Fat loss", formatMetricValue(groupMetrics.fat_loss_kg, " kg")],
       ["Muscle gain", formatMetricValue(groupMetrics.muscle_gain_kg, " kg")],
       ["Body fat", formatMetricValue(groupMetrics.body_fat_percent_change, "%")],
-      ["Fitness score", `${formatMetricValue(groupMetrics.overall_fitness_score, "")}/100`]
+      ["Fitness", `${formatMetricValue(groupMetrics.overall_fitness_score, "")}/100`]
     ];
 
     for (const [label, value] of metricRows) {
@@ -279,6 +300,7 @@ function setResultStage(stage) {
     button.classList.toggle("is-selected", button.dataset.viewStage === stage);
   });
   clearSocialAsset("selected", socialPreviewSelected, socialPreviewWrapSelected, downloadSocialSelected, shareSocialSelected);
+  saveSocialSelected.classList.add("hidden");
   if (unifiedExportHint) {
     unifiedExportHint.textContent = stage === "current"
       ? "Create a clean post from the current photo"
@@ -311,6 +333,29 @@ function getSelectedExportConfig() {
 function closeViewer() {
   imageViewer.classList.add("hidden");
   document.body.classList.remove("viewer-open");
+}
+
+function openExportSheet() {
+  const asset = socialAssets.selected;
+  if (!asset) {
+    return;
+  }
+  exportSheetPreview.src = asset.objectUrl;
+  exportSheetSubtitle.textContent = `${resultSocialFormat.value === "story" ? "Story" : "Post"} image for ${viewerLabels[selectedResultStage] || "selected stage"}`;
+  sheetShareBtn.classList.toggle("hidden", shareSocialSelected.classList.contains("hidden"));
+  exportSheet.classList.remove("hidden");
+  document.body.classList.add("viewer-open");
+}
+
+function closeSheet({ resetInline = false } = {}) {
+  exportSheet.classList.add("hidden");
+  document.body.classList.remove("viewer-open");
+  if (resetInline) {
+    socialPreviewWrapSelected.classList.add("hidden");
+    saveSocialSelected.classList.add("hidden");
+    downloadSocialSelected.classList.add("hidden");
+    shareSocialSelected.classList.add("hidden");
+  }
 }
 
 function loadImage(src) {
@@ -375,19 +420,19 @@ function fillGradientBackground(ctx, width, height) {
 }
 
 function drawLabelPill(ctx, text, x, y) {
-  ctx.font = "700 30px Sora, Arial, sans-serif";
+  ctx.font = "800 24px Sora, Arial, sans-serif";
   const metrics = ctx.measureText(text);
-  const padX = 26;
-  const height = 58;
+  const padX = 22;
+  const height = 48;
   const width = metrics.width + padX * 2;
   ctx.save();
-  ctx.fillStyle = "rgba(10, 10, 10, 0.8)";
-  roundRect(ctx, x, y, width, height, 29);
+  ctx.fillStyle = "rgba(5, 5, 5, 0.72)";
+  roundRect(ctx, x, y, width, height, 24);
   ctx.fill();
-  ctx.strokeStyle = "rgba(255, 189, 138, 0.3)";
+  ctx.strokeStyle = "rgba(245, 239, 230, 0.28)";
   ctx.lineWidth = 2;
   ctx.stroke();
-  ctx.fillStyle = "#fff6eb";
+  ctx.fillStyle = "#f5efe6";
   ctx.textBaseline = "middle";
   ctx.fillText(text, x + padX, y + height / 2);
   ctx.restore();
@@ -406,41 +451,57 @@ function drawOutlinedCard(ctx, x, y, width, height, radius, fillStyle, strokeSty
 
 function drawBrandBadge(ctx, x, y, brandName) {
   ctx.save();
-  const badgeWidth = 252;
-  const badgeHeight = 82;
-  ctx.fillStyle = "rgba(201, 107, 34, 0.14)";
-  roundRect(ctx, x, y, badgeWidth, badgeHeight, 24);
+  const badgeWidth = 236;
+  const badgeHeight = 66;
+  ctx.fillStyle = "rgba(241, 135, 45, 0.16)";
+  roundRect(ctx, x, y, badgeWidth, badgeHeight, 18);
   ctx.fill();
-  ctx.strokeStyle = "rgba(241, 135, 45, 0.48)";
+  ctx.strokeStyle = "rgba(241, 135, 45, 0.54)";
   ctx.lineWidth = 2;
   ctx.stroke();
 
   ctx.fillStyle = "rgba(245, 239, 230, 0.72)";
-  ctx.font = "800 18px Sora, Arial, sans-serif";
-  ctx.fillText("FIT CHECK", x + 22, y + 29);
-  ctx.font = "800 34px Sora, Arial, sans-serif";
+  ctx.font = "800 15px Sora, Arial, sans-serif";
+  ctx.fillText("FIT CHECK", x + 20, y + 24);
+  ctx.font = "800 28px Sora, Arial, sans-serif";
   ctx.fillStyle = "#f5efe6";
-  ctx.fillText(brandName, x + 22, y + 66);
+  ctx.fillText(brandName, x + 20, y + 52);
   ctx.restore();
 }
 
 function drawArrowConnector(ctx, x, y, width) {
   ctx.save();
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.92)";
-  ctx.lineWidth = 6;
+  ctx.strokeStyle = "rgba(241, 135, 45, 0.92)";
+  ctx.lineWidth = 7;
   ctx.lineCap = "round";
   ctx.beginPath();
   ctx.moveTo(x, y);
   ctx.lineTo(x + width, y);
   ctx.stroke();
 
-  ctx.fillStyle = "rgba(255, 255, 255, 0.96)";
+  ctx.fillStyle = "rgba(241, 135, 45, 0.96)";
   ctx.beginPath();
   ctx.moveTo(x + width, y);
-  ctx.lineTo(x + width - 26, y - 16);
-  ctx.lineTo(x + width - 26, y + 16);
+  ctx.lineTo(x + width - 28, y - 18);
+  ctx.lineTo(x + width - 28, y + 18);
   ctx.closePath();
   ctx.fill();
+  ctx.restore();
+}
+
+function drawAccentRule(ctx, x, y, width) {
+  const gradient = ctx.createLinearGradient(x, y, x + width, y);
+  gradient.addColorStop(0, "rgba(241, 135, 45, 0)");
+  gradient.addColorStop(0.16, "rgba(241, 135, 45, 0.95)");
+  gradient.addColorStop(0.84, "rgba(241, 135, 45, 0.95)");
+  gradient.addColorStop(1, "rgba(241, 135, 45, 0)");
+  ctx.save();
+  ctx.strokeStyle = gradient;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + width, y);
+  ctx.stroke();
   ctx.restore();
 }
 
@@ -470,8 +531,8 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 3) {
 
 async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, format }) {
   const size = format === "story"
-    ? { width: 1080, height: 1920, imageHeight: 760, gap: 34, sidePad: 58, topPad: 108 }
-    : { width: 1080, height: 1350, imageHeight: 590, gap: 30, sidePad: 52, topPad: 64 };
+    ? { width: 1080, height: 1920, imageHeight: 950, gap: 34, sidePad: 60, topPad: 82 }
+    : { width: 1080, height: 1350, imageHeight: 650, gap: 28, sidePad: 56, topPad: 56 };
 
   const canvas = document.createElement("canvas");
   canvas.width = size.width;
@@ -480,31 +541,32 @@ async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, form
 
   fillGradientBackground(ctx, size.width, size.height);
 
-  const outerX = 20;
-  const outerY = 20;
-  const outerWidth = size.width - 40;
-  const outerHeight = size.height - 40;
-  drawOutlinedCard(ctx, outerX, outerY, outerWidth, outerHeight, 42, "rgba(8, 8, 7, 0.62)", "rgba(245, 239, 230, 0.16)");
+  const outerX = 28;
+  const outerY = 28;
+  const outerWidth = size.width - 56;
+  const outerHeight = size.height - 56;
+  drawOutlinedCard(ctx, outerX, outerY, outerWidth, outerHeight, 44, "rgba(8, 8, 7, 0.72)", "rgba(245, 239, 230, 0.15)");
 
-  drawBrandBadge(ctx, size.sidePad, size.topPad - 12, "MY GYM");
+  drawBrandBadge(ctx, size.sidePad, size.topPad, "MY GYM");
 
   ctx.fillStyle = "#f5efe6";
-  ctx.font = format === "story" ? "900 82px Sora, Arial, sans-serif" : "900 64px Sora, Arial, sans-serif";
-  ctx.fillText("Quiet progress.", size.sidePad, size.topPad + 150);
+  ctx.font = format === "story" ? "900 86px Sora, Arial, sans-serif" : "900 70px Sora, Arial, sans-serif";
+  ctx.fillText("Quiet progress.", size.sidePad, size.topPad + (format === "story" ? 166 : 146));
 
   ctx.fillStyle = "#a8a096";
-  ctx.font = format === "story" ? "600 34px Sora, Arial, sans-serif" : "600 28px Sora, Arial, sans-serif";
-  ctx.fillText(`Current vs projected ${timelineLabel.toLowerCase()} progress`, size.sidePad, size.topPad + (format === "story" ? 208 : 198));
+  ctx.font = format === "story" ? "600 32px Sora, Arial, sans-serif" : "600 27px Sora, Arial, sans-serif";
+  ctx.fillText(`Current vs projected ${timelineLabel.toLowerCase()} progress`, size.sidePad, size.topPad + (format === "story" ? 218 : 192));
+  drawAccentRule(ctx, size.sidePad, size.topPad + (format === "story" ? 250 : 222), size.width - size.sidePad * 2);
 
-  const cardY = size.topPad + (format === "story" ? 300 : 258);
+  const cardY = size.topPad + (format === "story" ? 306 : 258);
   const cardWidth = (size.width - size.sidePad * 2 - size.gap) / 2;
-  const cardRadius = 32;
+  const cardRadius = 34;
 
   ctx.save();
   ctx.shadowColor = "rgba(0, 0, 0, 0.38)";
   ctx.shadowBlur = 58;
   ctx.shadowOffsetY = 26;
-  ctx.fillStyle = "rgba(17, 16, 14, 0.92)";
+  ctx.fillStyle = "rgba(17, 16, 14, 0.94)";
   roundRect(ctx, size.sidePad, cardY, cardWidth, size.imageHeight, cardRadius);
   ctx.fill();
   roundRect(ctx, size.sidePad + cardWidth + size.gap, cardY, cardWidth, size.imageHeight, cardRadius);
@@ -522,42 +584,43 @@ async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, form
   roundRect(ctx, size.sidePad + cardWidth + size.gap, cardY, cardWidth, size.imageHeight, cardRadius);
   ctx.stroke();
 
-  drawArrowConnector(ctx, size.width / 2 - 48, cardY + size.imageHeight / 2, 96);
-  drawLabelPill(ctx, "NOW", size.sidePad + 24, cardY + 24);
-  drawLabelPill(ctx, timelineLabel.toUpperCase(), size.sidePad + cardWidth + size.gap + 24, cardY + 24);
+  drawArrowConnector(ctx, size.width / 2 - 44, cardY + size.imageHeight / 2, 88);
+  drawLabelPill(ctx, "NOW", size.sidePad + 22, cardY + 22);
+  drawLabelPill(ctx, timelineLabel.toUpperCase(), size.sidePad + cardWidth + size.gap + 22, cardY + 22);
 
-  const footerY = cardY + size.imageHeight + (format === "story" ? 72 : 54);
-  const footerHeight = format === "story" ? 300 : 218;
+  const footerY = cardY + size.imageHeight + (format === "story" ? 62 : 42);
+  const footerHeight = format === "story" ? 300 : 230;
   drawOutlinedCard(
     ctx,
     size.sidePad,
     footerY,
     size.width - size.sidePad * 2,
     footerHeight,
-    34,
-    "rgba(17, 16, 14, 0.82)",
-    "rgba(245, 239, 230, 0.16)"
+    30,
+    "rgba(245, 239, 230, 0.055)",
+    "rgba(245, 239, 230, 0.14)"
   );
 
   ctx.fillStyle = "#f5efe6";
-  ctx.font = format === "story" ? "700 44px Sora, Arial, sans-serif" : "700 36px Sora, Arial, sans-serif";
-  ctx.fillText("Transformation preview", size.sidePad + 34, footerY + 72);
+  ctx.font = format === "story" ? "800 46px Sora, Arial, sans-serif" : "800 38px Sora, Arial, sans-serif";
+  ctx.fillText("Transformation preview", size.sidePad + 34, footerY + 66);
 
   ctx.fillStyle = "#a8a096";
-  ctx.font = format === "story" ? "500 28px Sora, Arial, sans-serif" : "500 24px Sora, Arial, sans-serif";
+  ctx.font = format === "story" ? "500 28px Sora, Arial, sans-serif" : "500 23px Sora, Arial, sans-serif";
   drawWrappedText(
     ctx,
     "A personalized visual estimate. Real progress depends on consistency, training, nutrition, and recovery.",
     size.sidePad + 34,
-    footerY + 126,
+    footerY + 116,
     size.width - size.sidePad * 2 - 68,
     format === "story" ? 42 : 34,
     2
   );
 
+  drawAccentRule(ctx, size.sidePad + 34, footerY + footerHeight - 70, size.width - size.sidePad * 2 - 68);
   ctx.fillStyle = "#f1872d";
-  ctx.font = format === "story" ? "800 30px Sora, Arial, sans-serif" : "800 26px Sora, Arial, sans-serif";
-  ctx.fillText(format === "story" ? "READY FOR STORIES" : "READY FOR THE FEED", size.sidePad + 34, footerY + footerHeight - 36);
+  ctx.font = format === "story" ? "900 32px Sora, Arial, sans-serif" : "900 28px Sora, Arial, sans-serif";
+  ctx.fillText(format === "story" ? "READY FOR STORIES" : "READY FOR THE FEED", size.sidePad + 34, footerY + footerHeight - 30);
 
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -622,6 +685,27 @@ function downloadSocialAsset(key) {
   }, 0);
 }
 
+function openInstagramForFormat(format) {
+  const isStory = format === "story";
+  const appUrl = isStory ? "instagram://story-camera" : "instagram://camera";
+  const webUrl = isStory ? "https://www.instagram.com/" : "https://www.instagram.com/create/select/";
+  setStatus(isStory ? "Opening Instagram for a story..." : "Opening Instagram for a post...");
+  window.location.href = appUrl;
+  window.setTimeout(() => {
+    if (!document.hidden) {
+      window.location.href = webUrl;
+    }
+  }, 900);
+}
+
+function openInstagramAfterExport(key, formatSelect) {
+  if (!socialAssets[key]) {
+    setStatus("Design the post first, then open Instagram.", true);
+    return;
+  }
+  openInstagramForFormat(formatSelect.value);
+}
+
 async function shareSocialAsset(key, timelineLabel) {
   const asset = socialAssets[key];
   if (!asset) {
@@ -674,6 +758,32 @@ imageViewer.addEventListener("click", (event) => {
   }
 });
 
+exportSheet.addEventListener("click", (event) => {
+  if (event.target === exportSheet) {
+    closeSheet({ resetInline: true });
+  }
+});
+
+closeExportSheet.addEventListener("click", () => closeSheet({ resetInline: true }));
+
+sheetDownloadBtn.addEventListener("click", () => {
+  downloadSocialAsset("selected");
+});
+
+sheetInstagramBtn.addEventListener("click", () => {
+  openInstagramAfterExport("selected", resultSocialFormat);
+});
+
+sheetShareBtn.addEventListener("click", async () => {
+  try {
+    await shareSocialAsset("selected", viewerLabels[selectedResultStage] || "Selected");
+  } catch (error) {
+    if (error?.name !== "AbortError") {
+      setStatus(error.message || "Could not share the image.", true);
+    }
+  }
+});
+
 resultStageImage.addEventListener("click", () => {
   openImageViewer(selectedResultStage);
 });
@@ -681,6 +791,7 @@ resultStageImage.addEventListener("click", () => {
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     closeViewer();
+    closeSheet({ resetInline: true });
   }
 });
 
@@ -862,14 +973,15 @@ socialFormat1y.addEventListener("change", () => {
 
 resultSocialFormat.addEventListener("change", () => {
   clearSocialAsset("selected", socialPreviewSelected, socialPreviewWrapSelected, downloadSocialSelected, shareSocialSelected);
+  saveSocialSelected.classList.add("hidden");
 });
 
 downloadSocial6m.addEventListener("click", () => {
-  downloadSocialAsset("sixMonths");
+  openInstagramAfterExport("sixMonths", socialFormat6m);
 });
 
 downloadSocial1y.addEventListener("click", () => {
-  downloadSocialAsset("oneYear");
+  openInstagramAfterExport("oneYear", socialFormat1y);
 });
 
 shareSocial6m.addEventListener("click", async () => {
@@ -912,6 +1024,8 @@ generateSocialSelected.addEventListener("click", async () => {
       downloadBtnEl: downloadSocialSelected,
       shareBtnEl: shareSocialSelected
     });
+    saveSocialSelected.classList.remove("hidden");
+    openExportSheet();
     setStatus(`${config.timelineLabel} share image is ready.`);
   } catch (error) {
     setStatus(error.message || "Could not create the share image.", true);
@@ -921,6 +1035,10 @@ generateSocialSelected.addEventListener("click", async () => {
 });
 
 downloadSocialSelected.addEventListener("click", () => {
+  openInstagramAfterExport("selected", resultSocialFormat);
+});
+
+saveSocialSelected.addEventListener("click", () => {
   downloadSocialAsset("selected");
 });
 
@@ -986,6 +1104,7 @@ form.addEventListener("submit", async (event) => {
   clearSocialAsset("sixMonths", socialPreview6m, socialPreviewWrap6m, downloadSocial6m, shareSocial6m);
   clearSocialAsset("oneYear", socialPreview1y, socialPreviewWrap1y, downloadSocial1y, shareSocial1y);
   clearSocialAsset("selected", socialPreviewSelected, socialPreviewWrapSelected, downloadSocialSelected, shareSocialSelected);
+  saveSocialSelected.classList.add("hidden");
   setComparePosition(compareRange6m, compareAfterWrap6m);
   setComparePosition(compareRange1y, compareAfterWrap1y);
   setLoading(true, "Creating your transformation. This can take about a minute...");
@@ -1023,6 +1142,7 @@ window.addEventListener("beforeunload", () => {
   clearSocialAsset("sixMonths", socialPreview6m, socialPreviewWrap6m, downloadSocial6m, shareSocial6m);
   clearSocialAsset("oneYear", socialPreview1y, socialPreviewWrap1y, downloadSocial1y, shareSocial1y);
   clearSocialAsset("selected", socialPreviewSelected, socialPreviewWrapSelected, downloadSocialSelected, shareSocialSelected);
+  saveSocialSelected.classList.add("hidden");
   if (currentPreviewUrl && currentPreviewUrl.startsWith("blob:")) {
     URL.revokeObjectURL(currentPreviewUrl);
   }

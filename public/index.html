@@ -278,8 +278,9 @@
               <img id="socialPreviewSelected" class="social-preview" alt="Instagram-ready selected comparison" />
             </div>
             <div class="social-actions">
-              <button type="button" id="generateSocialSelected" class="secondary-btn">Design Post</button>
-              <button type="button" id="downloadSocialSelected" class="secondary-btn hidden">Save PNG</button>
+              <button type="button" id="generateSocialSelected" class="secondary-btn">Create Share Image</button>
+              <button type="button" id="saveSocialSelected" class="secondary-btn hidden">Download</button>
+              <button type="button" id="downloadSocialSelected" class="secondary-btn hidden">Open Instagram</button>
               <button type="button" id="shareSocialSelected" class="secondary-btn hidden">Share</button>
             </div>
           </div>
@@ -320,7 +321,7 @@
             </div>
             <div class="social-actions">
               <button type="button" id="generateSocial6m" class="secondary-btn">Design Post</button>
-              <button type="button" id="downloadSocial6m" class="secondary-btn hidden">Save PNG</button>
+              <button type="button" id="downloadSocial6m" class="secondary-btn hidden">Open Instagram</button>
               <button type="button" id="shareSocial6m" class="secondary-btn hidden">Share</button>
             </div>
           </div>
@@ -361,7 +362,7 @@
             </div>
             <div class="social-actions">
               <button type="button" id="generateSocial1y" class="secondary-btn">Design Post</button>
-              <button type="button" id="downloadSocial1y" class="secondary-btn hidden">Save PNG</button>
+              <button type="button" id="downloadSocial1y" class="secondary-btn hidden">Open Instagram</button>
               <button type="button" id="shareSocial1y" class="secondary-btn hidden">Share</button>
             </div>
           </div>
@@ -379,6 +380,24 @@
             <button type="button" class="viewer-tab" data-view-stage="current">Current</button>
             <button type="button" class="viewer-tab" data-view-stage="sixMonths">6 months</button>
             <button type="button" class="viewer-tab" data-view-stage="oneYear">1 year</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="exportSheet" class="export-sheet hidden" aria-modal="true" role="dialog" aria-label="Share image ready">
+        <div class="export-sheet-panel">
+          <div class="image-viewer-head">
+            <div>
+              <p>Your share image is ready</p>
+              <span id="exportSheetSubtitle">Download it or open Instagram.</span>
+            </div>
+            <button id="closeExportSheet" type="button" class="secondary-btn image-viewer-close" aria-label="Close export options">Close</button>
+          </div>
+          <img id="exportSheetPreview" alt="Generated Instagram-ready preview" />
+          <div class="social-actions export-sheet-actions">
+            <button type="button" id="sheetDownloadBtn" class="secondary-btn">Download</button>
+            <button type="button" id="sheetInstagramBtn" class="secondary-btn">Open Instagram</button>
+            <button type="button" id="sheetShareBtn" class="secondary-btn hidden">Share</button>
           </div>
         </div>
       </section>

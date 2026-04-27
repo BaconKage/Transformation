@@ -599,6 +599,10 @@ summary {
   gap: var(--space-4);
 }
 
+.transformation-head {
+  align-items: center;
+}
+
 .transformation-head h2,
 .result-card h2 {
   margin: 0;
@@ -614,24 +618,53 @@ summary {
 .metric-group {
   display: grid;
   gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: rgba(245, 239, 230, 0.025);
 }
 
-.metric-group h3 {
+.metric-group-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-1) var(--space-2);
+  align-items: end;
+}
+
+.metric-group-head span {
+  grid-column: 1 / -1;
+  color: var(--color-accent-strong);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.metric-group-head h3 {
   margin: 0;
-  color: var(--color-muted);
-  font-size: 0.86rem;
-  font-weight: 500;
+  color: var(--color-text);
+  font-size: 1.25rem;
+  font-weight: 650;
   text-transform: capitalize;
+}
+
+.metric-group-head strong {
+  color: var(--color-accent-strong);
+  font-size: 1rem;
+  font-weight: 800;
 }
 
 .metric-list {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
 }
 
 .metric-card {
-  min-height: 72px;
+  min-height: 82px;
   padding: var(--space-3);
-  border-top: 1px solid var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: rgba(5, 5, 5, 0.36);
   display: grid;
   align-content: space-between;
   gap: var(--space-2);
@@ -639,8 +672,9 @@ summary {
 
 .metric-card strong {
   color: var(--color-text);
-  font-size: 1rem;
-  font-weight: 550;
+  font-size: 1.28rem;
+  font-weight: 750;
+  line-height: 1;
 }
 
 .results {
@@ -718,8 +752,8 @@ summary {
   color: var(--color-text);
 }
 
-.legacy-result-card {
-  display: none;
+.result-card.legacy-result-card {
+  display: none !important;
 }
 
 .result-card {
@@ -809,7 +843,8 @@ summary {
   overflow: hidden;
 }
 
-.image-viewer {
+.image-viewer,
+.export-sheet {
   position: fixed;
   inset: 0;
   z-index: 40;
@@ -821,7 +856,8 @@ summary {
   animation: quietEnter var(--motion-quick) both;
 }
 
-.image-viewer-panel {
+.image-viewer-panel,
+.export-sheet-panel {
   width: min(100%, 760px);
   max-height: calc(100svh - var(--space-5));
   padding: var(--space-3);
@@ -830,6 +866,10 @@ summary {
   background: #080807;
   display: grid;
   gap: var(--space-3);
+}
+
+.export-sheet-panel {
+  width: min(100%, 520px);
 }
 
 .image-viewer-head,
@@ -849,6 +889,13 @@ summary {
   font-weight: 600;
 }
 
+.image-viewer-head span {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
 .image-viewer-close {
   min-height: 38px;
   padding: 0.55rem 0.8rem;
@@ -861,6 +908,19 @@ summary {
   border-radius: var(--radius-md);
   object-fit: contain;
   background: #050505;
+}
+
+#exportSheetPreview {
+  width: 100%;
+  max-height: min(58svh, 620px);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  object-fit: contain;
+  background: #050505;
+}
+
+.export-sheet-actions {
+  grid-template-columns: 1fr;
 }
 
 .image-viewer-tabs {
@@ -1040,9 +1100,27 @@ summary {
 
   .grid,
   .compact-grid,
+  .metrics-grid,
   .metric-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-2);
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-group {
+    padding: var(--space-2);
+  }
+
+  .metric-card {
+    min-height: 68px;
+    padding: var(--space-2);
+  }
+
+  .metric-card strong {
+    font-size: 1.08rem;
   }
 
   .choice-grid {
@@ -1142,11 +1220,13 @@ summary {
     font-size: 0.72rem;
   }
 
-  .image-viewer {
+  .image-viewer,
+  .export-sheet {
     padding: var(--space-2);
   }
 
-  .image-viewer-panel {
+  .image-viewer-panel,
+  .export-sheet-panel {
     max-height: calc(100svh - var(--space-3));
     border-radius: var(--radius-md);
   }
