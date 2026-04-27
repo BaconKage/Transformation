@@ -26,6 +26,15 @@ const downloadSocial6m = document.getElementById("downloadSocial6m");
 const downloadSocial1y = document.getElementById("downloadSocial1y");
 const shareSocial6m = document.getElementById("shareSocial6m");
 const shareSocial1y = document.getElementById("shareSocial1y");
+const timelineCurrentImg = document.getElementById("timelineCurrentImg");
+const timeline6mImg = document.getElementById("timeline6mImg");
+const timeline1yImg = document.getElementById("timeline1yImg");
+const timelineThumbButtons = document.querySelectorAll(".timeline-thumb");
+const imageViewer = document.getElementById("imageViewer");
+const imageViewerImg = document.getElementById("imageViewerImg");
+const imageViewerTitle = document.getElementById("imageViewerTitle");
+const closeImageViewer = document.getElementById("closeImageViewer");
+const viewerTabButtons = document.querySelectorAll(".viewer-tab");
 const photoInput = document.getElementById("photo");
 const uploadBtn = document.getElementById("uploadBtn");
 const openCameraBtn = document.getElementById("openCameraBtn");
@@ -44,15 +53,27 @@ const goalChoiceButtons = document.querySelectorAll(".goal-choice");
 let cameraStream = null;
 let capturedPhotoFile = null;
 let currentPreviewUrl = "";
+let currentOriginalImageSrc = "";
 let currentFacingMode = "user";
 const socialAssets = {
   sixMonths: null,
   oneYear: null
 };
+const viewerSources = {
+  current: "",
+  sixMonths: "",
+  oneYear: ""
+};
+const viewerLabels = {
+  current: "Current",
+  sixMonths: "6 months",
+  oneYear: "1 year"
+};
 
 function initializeView() {
   setLoading(false);
   resultsEl.classList.add("hidden");
+  imageViewer.classList.add("hidden");
   transformationDataEl.classList.add("hidden");
   cameraWrap.classList.add("hidden");
   previewWrap.classList.add("hidden");
@@ -149,6 +170,7 @@ function setStatus(message, isError = false) {
 
 function setComparePosition(rangeInput, afterWrap) {
   const value = Number(rangeInput.value);
+  syncCompareImageWidth(afterWrap);
   afterWrap.style.width = `${value}%`;
 }
 
@@ -180,6 +202,7 @@ function setPreview(url) {
     URL.revokeObjectURL(currentPreviewUrl);
   }
   currentPreviewUrl = url;
+  currentOriginalImageSrc = url;
   selectedPreview.src = url;
   previewWrap.classList.remove("hidden");
 }
@@ -189,6 +212,49 @@ function setBeforeAndAfterSources(after6mUrl, after1yUrl, beforeUrl) {
   before1y.src = beforeUrl;
   img6m.src = after6mUrl;
   img1y.src = after1yUrl;
+  viewerSources.current = beforeUrl;
+  viewerSources.sixMonths = after6mUrl;
+  viewerSources.oneYear = after1yUrl;
+  timelineCurrentImg.src = beforeUrl;
+  timeline6mImg.src = after6mUrl;
+  timeline1yImg.src = after1yUrl;
+}
+
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error("Could not preview the selected photo."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function syncCompareImageWidth(afterWrap) {
+  const frame = afterWrap.closest(".compare-frame");
+  const image = afterWrap.querySelector(".compare-image-after");
+  if (!frame || !image) {
+    return;
+  }
+  image.style.width = `${frame.clientWidth}px`;
+}
+
+function openImageViewer(stage) {
+  const src = viewerSources[stage];
+  if (!src) {
+    return;
+  }
+  imageViewerImg.src = src;
+  imageViewerTitle.textContent = viewerLabels[stage] || "Preview";
+  viewerTabButtons.forEach((button) => {
+    button.classList.toggle("is-selected", button.dataset.viewStage === stage);
+  });
+  imageViewer.classList.remove("hidden");
+  document.body.classList.add("viewer-open");
+}
+
+function closeViewer() {
+  imageViewer.classList.add("hidden");
+  document.body.classList.remove("viewer-open");
 }
 
 function loadImage(src) {
@@ -532,6 +598,32 @@ compareRange1y.addEventListener("input", () => {
   setComparePosition(compareRange1y, compareAfterWrap1y);
 });
 
+timelineThumbButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    openImageViewer(button.dataset.viewStage);
+  });
+});
+
+viewerTabButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    openImageViewer(button.dataset.viewStage);
+  });
+});
+
+closeImageViewer.addEventListener("click", closeViewer);
+
+imageViewer.addEventListener("click", (event) => {
+  if (event.target === imageViewer) {
+    closeViewer();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeViewer();
+  }
+});
+
 async function stopCamera() {
   if (cameraStream) {
     cameraStream.getTracks().forEach((track) => track.stop());
@@ -561,7 +653,12 @@ photoInput.addEventListener("change", async () => {
   }
   capturedPhotoFile = null;
   await stopCamera();
-  setPreview(URL.createObjectURL(photoInput.files[0]));
+  try {
+    setPreview(await fileToDataUrl(photoInput.files[0]));
+    setStatus("Photo added.");
+  } catch (error) {
+    setStatus(error.message || "Could not preview the selected photo.", true);
+  }
 });
 
 openCameraBtn.addEventListener("click", async () => {
@@ -612,8 +709,8 @@ captureBtn.addEventListener("click", async () => {
   capturedPhotoFile = new File([blob], "captured-photo.jpg", { type: "image/jpeg" });
   photoInput.value = "";
   await stopCamera();
-  setPreview(URL.createObjectURL(capturedPhotoFile));
-    setStatus("Photo added.");
+  setPreview(canvas.toDataURL("image/jpeg", 0.92));
+  setStatus("Photo added.");
 });
 
 cancelCameraBtn.addEventListener("click", async () => {
@@ -643,10 +740,11 @@ generateSocial6m.addEventListener("click", async () => {
     return;
   }
   try {
+    generateSocial6m.disabled = true;
     setStatus("Creating your 6-month share image...");
     await renderSocialAsset({
       key: "sixMonths",
-      beforeSrc: before6m.src,
+      beforeSrc: currentOriginalImageSrc || before6m.src,
       afterSrc: img6m.src,
       timelineLabel: "6 Months",
       formatSelect: socialFormat6m,
@@ -658,6 +756,8 @@ generateSocial6m.addEventListener("click", async () => {
     setStatus("6-month share image is ready.");
   } catch (error) {
     setStatus(error.message || "Could not create the share image.", true);
+  } finally {
+    generateSocial6m.disabled = false;
   }
 });
 
@@ -667,10 +767,11 @@ generateSocial1y.addEventListener("click", async () => {
     return;
   }
   try {
+    generateSocial1y.disabled = true;
     setStatus("Creating your 1-year share image...");
     await renderSocialAsset({
       key: "oneYear",
-      beforeSrc: before1y.src,
+      beforeSrc: currentOriginalImageSrc || before1y.src,
       afterSrc: img1y.src,
       timelineLabel: "1 Year",
       formatSelect: socialFormat1y,
@@ -682,6 +783,8 @@ generateSocial1y.addEventListener("click", async () => {
     setStatus("1-year share image is ready.");
   } catch (error) {
     setStatus(error.message || "Could not create the share image.", true);
+  } finally {
+    generateSocial1y.disabled = false;
   }
 });
 
@@ -720,6 +823,11 @@ shareSocial1y.addEventListener("click", async () => {
     }
   }
 });
+
+before6m.addEventListener("click", () => openImageViewer("current"));
+before1y.addEventListener("click", () => openImageViewer("current"));
+img6m.addEventListener("click", () => openImageViewer("sixMonths"));
+img1y.addEventListener("click", () => openImageViewer("oneYear"));
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -784,8 +892,10 @@ form.addEventListener("submit", async (event) => {
 
     renderTransformationData(payload);
     if (payload.sixMonthsImage && payload.oneYearImage) {
-      setBeforeAndAfterSources(payload.sixMonthsImage, payload.oneYearImage, selectedPreview.src);
+      setBeforeAndAfterSources(payload.sixMonthsImage, payload.oneYearImage, currentOriginalImageSrc || selectedPreview.src);
       resultsEl.classList.remove("hidden");
+      syncCompareImageWidth(compareAfterWrap6m);
+      syncCompareImageWidth(compareAfterWrap1y);
     }
     setLoading(false);
     setStatus(payload.note || "Your preview is ready.");
@@ -804,6 +914,11 @@ window.addEventListener("beforeunload", () => {
   if (currentPreviewUrl && currentPreviewUrl.startsWith("blob:")) {
     URL.revokeObjectURL(currentPreviewUrl);
   }
+});
+
+window.addEventListener("resize", () => {
+  syncCompareImageWidth(compareAfterWrap6m);
+  syncCompareImageWidth(compareAfterWrap1y);
 });
 
 initializeView();

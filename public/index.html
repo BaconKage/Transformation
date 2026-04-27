@@ -237,6 +237,30 @@
       </section>
 
       <section id="results" class="results hidden">
+        <article class="timeline-viewer">
+          <div class="result-head">
+            <div>
+              <p class="result-kicker">Timeline</p>
+              <h2>Tap to view larger</h2>
+            </div>
+            <div class="result-chip">Current to 1 year</div>
+          </div>
+          <div class="timeline-strip" aria-label="Transformation timeline">
+            <button type="button" class="timeline-thumb" data-view-stage="current">
+              <img id="timelineCurrentImg" alt="Current photo thumbnail" />
+              <span>Current</span>
+            </button>
+            <button type="button" class="timeline-thumb" data-view-stage="sixMonths">
+              <img id="timeline6mImg" alt="6-month preview thumbnail" />
+              <span>6 months</span>
+            </button>
+            <button type="button" class="timeline-thumb" data-view-stage="oneYear">
+              <img id="timeline1yImg" alt="1-year preview thumbnail" />
+              <span>1 year</span>
+            </button>
+          </div>
+        </article>
+
         <article class="result-card">
           <div class="result-head">
             <div>
@@ -318,6 +342,21 @@
             </div>
           </div>
         </article>
+      </section>
+
+      <section id="imageViewer" class="image-viewer hidden" aria-modal="true" role="dialog" aria-label="Transformation image viewer">
+        <div class="image-viewer-panel">
+          <div class="image-viewer-head">
+            <p id="imageViewerTitle">Current</p>
+            <button id="closeImageViewer" type="button" class="secondary-btn image-viewer-close" aria-label="Close image viewer">Close</button>
+          </div>
+          <img id="imageViewerImg" alt="Large transformation preview" />
+          <div class="image-viewer-tabs" aria-label="Choose timeline image">
+            <button type="button" class="viewer-tab" data-view-stage="current">Current</button>
+            <button type="button" class="viewer-tab" data-view-stage="sixMonths">6 months</button>
+            <button type="button" class="viewer-tab" data-view-stage="oneYear">1 year</button>
+          </div>
+        </div>
       </section>
     </main>
 

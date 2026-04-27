@@ -76,6 +76,7 @@ body::before {
 .card,
 .loading,
 .transformation-data,
+.timeline-viewer,
 .result-card {
   background: transparent;
   border: 0;
@@ -165,6 +166,7 @@ h1 {
 .expand-card,
 .submit-row,
 .transformation-data,
+.timeline-viewer,
 .result-card {
   border: 1px solid var(--color-line);
   background: rgba(12, 12, 11, 0.78);
@@ -174,6 +176,7 @@ h1 {
 .zen-panel,
 .submit-row,
 .transformation-data,
+.timeline-viewer,
 .result-card {
   animation: quietEnter var(--motion-soft) both;
 }
@@ -190,6 +193,7 @@ h1 {
 .photo-block,
 .submit-row,
 .transformation-data,
+.timeline-viewer,
 .result-card {
   padding: var(--space-5);
 }
@@ -524,6 +528,7 @@ summary {
 
 #cameraFeed,
 .upload-preview img,
+.timeline-thumb img,
 .social-preview,
 .result-card img {
   width: 100%;
@@ -644,6 +649,47 @@ summary {
   gap: var(--space-4);
 }
 
+.timeline-viewer {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.timeline-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.timeline-thumb {
+  min-height: 0;
+  padding: var(--space-2);
+  background: transparent;
+  border-color: var(--color-line);
+  color: var(--color-text);
+  display: grid;
+  gap: var(--space-2);
+  text-align: left;
+}
+
+.timeline-thumb:hover,
+.timeline-thumb:focus-visible {
+  background: var(--color-accent-soft);
+  border-color: rgba(241, 135, 45, 0.5);
+}
+
+.timeline-thumb img {
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+.timeline-thumb span {
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 .result-card {
   display: grid;
   gap: var(--space-3);
@@ -677,11 +723,17 @@ summary {
 
 .compare-after-wrap {
   position: absolute;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
   width: 50%;
   overflow: hidden;
   border-right: 1px solid rgba(245, 239, 230, 0.72);
   transition: width 120ms ease-out;
+}
+
+.compare-after-wrap .compare-image-after {
+  max-width: none;
 }
 
 .compare-range {
@@ -721,6 +773,83 @@ summary {
   color: var(--color-accent-strong);
 }
 
+.viewer-open {
+  overflow: hidden;
+}
+
+.image-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  padding: var(--space-3);
+  background: rgba(5, 5, 5, 0.86);
+  backdrop-filter: blur(14px);
+  display: grid;
+  place-items: center;
+  animation: quietEnter var(--motion-quick) both;
+}
+
+.image-viewer-panel {
+  width: min(100%, 760px);
+  max-height: calc(100svh - var(--space-5));
+  padding: var(--space-3);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-lg);
+  background: #080807;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.image-viewer-head,
+.image-viewer-tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.image-viewer-head {
+  justify-content: space-between;
+}
+
+.image-viewer-head p {
+  margin: 0;
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.image-viewer-close {
+  min-height: 38px;
+  padding: 0.55rem 0.8rem;
+}
+
+#imageViewerImg {
+  width: 100%;
+  max-height: min(68svh, 760px);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  object-fit: contain;
+  background: #050505;
+}
+
+.image-viewer-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.viewer-tab {
+  min-height: 40px;
+  padding: 0.6rem 0.7rem;
+  background: transparent;
+  border-color: var(--color-line);
+  color: var(--color-muted);
+}
+
+.viewer-tab.is-selected {
+  border-color: rgba(241, 135, 45, 0.65);
+  background: var(--color-accent-soft);
+  color: var(--color-text);
+}
+
 .hidden {
   display: none !important;
 }
@@ -744,7 +873,6 @@ summary {
 
   .hero,
   .composer-grid,
-  .results,
   .metrics-grid {
     grid-template-columns: 1fr;
   }
@@ -813,6 +941,7 @@ summary {
   .photo-block,
   .submit-row,
   .transformation-data,
+  .timeline-viewer,
   .result-card {
     padding: var(--space-3);
     border-radius: var(--radius-md);
@@ -952,9 +1081,49 @@ summary {
     width: 100%;
   }
 
+  .results {
+    grid-template-columns: repeat(2, minmax(82%, 1fr));
+    gap: var(--space-3);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: var(--space-2);
+  }
+
+  .timeline-viewer {
+    grid-column: 1 / -1;
+  }
+
+  .result-card {
+    scroll-snap-align: start;
+  }
+
+  .timeline-strip {
+    gap: var(--space-2);
+  }
+
+  .timeline-thumb {
+    padding: var(--space-1);
+    gap: var(--space-1);
+  }
+
+  .timeline-thumb span {
+    text-align: center;
+    font-size: 0.72rem;
+  }
+
+  .image-viewer {
+    padding: var(--space-2);
+  }
+
+  .image-viewer-panel {
+    max-height: calc(100svh - var(--space-3));
+    border-radius: var(--radius-md);
+  }
+
   .zen-panel,
   .submit-row,
   .transformation-data,
+  .timeline-viewer,
   .result-card {
     transform-origin: center bottom;
   }
