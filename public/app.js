@@ -417,6 +417,82 @@ function fileToDataUrl(file) {
   });
 }
 
+function canLoadImageSource(src) {
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.onload = () => resolve(true);
+    image.onerror = () => resolve(false);
+    image.src = src;
+  });
+}
+
+async function normalizeImageFile(file) {
+  if (!window.createImageBitmap) {
+    return "";
+  }
+  const bitmap = await createImageBitmap(file);
+  const maxSide = 1400;
+  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  bitmap.close?.();
+  return canvas.toDataURL("image/jpeg", 0.9);
+}
+
+async function buildPreviewSources(file) {
+  if (!file || !file.size) {
+    throw new Error("That photo file is empty. Try another image.");
+  }
+
+  const objectUrl = URL.createObjectURL(file);
+  let dataUrl = "";
+  try {
+    dataUrl = await fileToDataUrl(file);
+  } catch {
+    dataUrl = "";
+  }
+
+  if (await canLoadImageSource(objectUrl)) {
+    return {
+      displaySrc: objectUrl,
+      exportSrc: dataUrl || objectUrl,
+      fallbackSrc: dataUrl
+    };
+  }
+
+  if (dataUrl && await canLoadImageSource(dataUrl)) {
+    URL.revokeObjectURL(objectUrl);
+    return {
+      displaySrc: dataUrl,
+      exportSrc: dataUrl,
+      fallbackSrc: ""
+    };
+  }
+
+  try {
+    const normalizedUrl = await normalizeImageFile(file);
+    if (normalizedUrl && await canLoadImageSource(normalizedUrl)) {
+      URL.revokeObjectURL(objectUrl);
+      return {
+        displaySrc: normalizedUrl,
+        exportSrc: normalizedUrl,
+        fallbackSrc: ""
+      };
+    }
+  } catch {
+    // Unsupported browser image format, such as some HEIC/HEIF uploads.
+  }
+
+  URL.revokeObjectURL(objectUrl);
+  const typeHint = file.type ? ` (${file.type})` : "";
+  throw new Error(`This photo format${typeHint} cannot be shown here. Use JPG, PNG, or WebP.`);
+}
+
 function syncCompareImageWidth(afterWrap) {
   const frame = afterWrap.closest(".compare-frame");
   const image = afterWrap.querySelector(".compare-image-after");
@@ -1123,16 +1199,12 @@ photoInput.addEventListener("change", async () => {
   await stopCamera();
   try {
     const file = photoInput.files[0];
-    const objectUrl = URL.createObjectURL(file);
-    let dataUrl = "";
-    try {
-      dataUrl = await fileToDataUrl(file);
-    } catch {
-      dataUrl = "";
-    }
-    setPreview(objectUrl, dataUrl || objectUrl, dataUrl);
+    const previewSources = await buildPreviewSources(file);
+    setPreview(previewSources.displaySrc, previewSources.exportSrc, previewSources.fallbackSrc);
     setStatus("Photo added.");
   } catch (error) {
+    photoInput.value = "";
+    setPreviewError(error.message || "Photo could not load. Try another image.");
     setStatus(error.message || "Could not preview the selected photo.", true);
   }
 });
