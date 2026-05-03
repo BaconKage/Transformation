@@ -7,44 +7,61 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main class="container">
-      <section class="hero">
+    <main class="container action-shell">
+      <section class="hero action-hero">
         <div class="hero-copy">
           <p class="brand-tag">My Gym</p>
           <h1>Visualize your next transformation.</h1>
           <p class="sub">Create a realistic progress preview from one photo and a few quick choices.</p>
+          <button id="tryYourselfBtn" type="button" class="hero-cta">Try it yourself</button>
         </div>
-        <aside class="hero-panel">
-          <p class="hero-panel-kicker">Start here</p>
-          <div class="hero-steps">
-            <div class="hero-step">
-              <span>1</span>
-              <p>Add photo</p>
+
+        <div class="demo-stage single-demo-stage" aria-label="Example transformation timeline">
+          <article class="demo-showcase">
+            <div class="showcase-frame">
+              <img id="demoStageImage" src="./assets/current.png" alt="Current animated gym character" />
             </div>
-            <div class="hero-step">
-              <span>2</span>
-              <p>Pick goal</p>
-            </div>
-            <div class="hero-step">
-              <span>3</span>
-              <p>See result</p>
-            </div>
+            <p id="demoStageLabel">Current</p>
+          </article>
+
+          <div class="demo-tabs" aria-label="Choose example timeline stage">
+            <button type="button" class="demo-tab is-selected" data-demo-src="./assets/current.png" data-demo-label="Current" data-demo-alt="Current animated gym character">
+              <span>Current</span>
+            </button>
+            <button type="button" class="demo-tab" data-demo-src="./assets/6%20months.png" data-demo-label="6 months" data-demo-alt="Six month animated gym character">
+              <span>6 months</span>
+            </button>
+            <button type="button" class="demo-tab" data-demo-src="./assets/1%20year.png" data-demo-label="1 year" data-demo-alt="One year animated gym character">
+              <span>1 year</span>
+            </button>
           </div>
-        </aside>
+        </div>
       </section>
 
-      <form id="previewForm" class="card">
-        <section class="zen-panel composer-grid">
-          <div class="form-section">
-            <p class="section-eyebrow">Input</p>
-            <h2 class="section-heading">A clear photo and quiet details.</h2>
-            <p class="section-copy">Keep the input simple. The preview is built from your image, goal, and plan.</p>
+      <form id="previewForm" class="card intake-flow hidden" data-step="photo">
+        <div class="flow-head">
+          <div>
+            <p class="section-eyebrow">Your preview</p>
+            <h2 class="section-heading">Photo. Body stats. Goal.</h2>
+          </div>
+          <div class="flow-pills" aria-label="Preview steps">
+            <span>1 Photo</span>
+            <span>2 Goal</span>
+            <span>3 Plan</span>
+          </div>
+        </div>
+
+        <section class="zen-panel intake-panel photo-step" data-flow-step="photo">
+          <input id="photo" name="photo" type="file" accept="image/*" class="hidden-file" />
+          <div class="step-visual">
+            <span class="step-number">1</span>
+            <div class="upload-symbol" aria-hidden="true"></div>
+            <p>Photo</p>
           </div>
 
           <div class="photo-block">
-            <input id="photo" name="photo" type="file" accept="image/*" class="hidden-file" />
             <div class="photo-topbar">
-              <p class="section-title">Current photo</p>
+              <p class="section-title">Add photo</p>
               <div class="camera-choice">
                 <label for="cameraFacing">Camera</label>
                 <select id="cameraFacing">
@@ -76,23 +93,24 @@
             <div id="previewWrap" class="upload-preview hidden">
               <p>Selected photo</p>
               <img id="selectedPreview" alt="Your selected photo preview" />
-            </div>
-
-            <div class="hint-row">
-              <p class="hint">Clear full-body photo. Natural light. Calm background.</p>
-              <div class="tip-badge">Front-facing</div>
+              <div class="change-photo-actions">
+                <button id="changeUploadBtn" type="button" class="secondary-btn change-photo-btn">Upload another</button>
+                <button id="changeCameraBtn" type="button" class="secondary-btn change-photo-btn">Take another</button>
+              </div>
             </div>
           </div>
         </section>
 
-        <section class="zen-panel composer-grid">
-          <div class="form-section">
-            <p class="section-eyebrow">Profile</p>
-            <h2 class="section-heading">Only what helps the estimate.</h2>
-            <p class="section-copy profile-helper">Enter height in cm and weight in kg. If you use pounds, write it clearly, like 170 lb.</p>
+        <section class="zen-panel intake-panel details-step" data-flow-step="photo">
+          <div class="step-visual">
+            <span class="step-number">1</span>
+            <div class="stats-symbol" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
+            <p>Quick stats</p>
           </div>
 
-          <div class="grid">
+          <div class="grid profile-grid">
             <label class="field-card">
               <span>Gender</span>
               <select name="gender">
@@ -117,33 +135,35 @@
           </div>
         </section>
 
-        <section class="zen-panel composer-grid">
-          <div class="form-section">
-            <p class="section-eyebrow">Direction</p>
-            <h2 class="section-heading">Choose the path.</h2>
-            <p class="section-copy direction-helper">First choose your visual goal. Then choose the plan style that should guide the estimate.</p>
+        <section class="zen-panel intake-panel goal-step" data-flow-step="goals">
+          <div class="step-visual">
+            <span class="step-number">2</span>
+            <div class="goal-symbol" aria-hidden="true"></div>
+            <p>Goal</p>
           </div>
 
-          <div class="path-controls">
-            <div class="choice-label">Visual goal</div>
-            <div class="choice-grid goal-choice-grid">
+          <div class="path-controls compact-goals">
+            <div class="choice-grid goal-choice-grid big-choice-grid">
               <button type="button" class="choice-card goal-choice" data-goal="lose fat and get leaner">
-                <strong>Lose fat</strong>
-                <span>Lean down</span>
+                <span class="choice-visual lean-visual" aria-hidden="true"></span>
+                <strong>Fat loss</strong>
+                <span>Drop fat</span>
               </button>
               <button type="button" class="choice-card goal-choice" data-goal="gain lean muscle">
-                <strong>Gain muscle</strong>
-                <span>Build size</span>
+                <span class="choice-visual muscle-visual" aria-hidden="true"></span>
+                <strong>Muscle gain</strong>
+                <span>Add muscle</span>
               </button>
               <button type="button" class="choice-card goal-choice" data-goal="lose fat and gain muscle definition">
+                <span class="choice-visual recomp-visual" aria-hidden="true"></span>
                 <strong>Recomp</strong>
-                <span>Lean + toned</span>
+                <span>Lean + build</span>
               </button>
             </div>
 
-            <label class="field-card field-card-wide">
+            <label class="field-card field-card-wide quiet-input">
               <span>Goal note</span>
-              <input id="goalInput" name="goal" type="text" placeholder="Choose above or add your own" />
+              <input id="goalInput" name="goal" type="text" placeholder="Optional custom goal" />
             </label>
 
             <select id="selectedPlanId" name="selectedPlanId" class="hidden-select" aria-label="Selected plan">
@@ -153,51 +173,57 @@
               <option value="athletic_recomp">Athletic Recomp</option>
             </select>
 
-            <div class="choice-label">Plan style</div>
-            <div class="choice-grid plan-choice-grid">
+            <div class="choice-grid plan-choice-grid big-choice-grid">
               <button type="button" class="choice-card plan-choice" data-plan="beginner_fat_loss">
-                <strong>Fat loss</strong>
+                <strong>Fat loss plan</strong>
                 <span>Strength + cardio</span>
               </button>
               <button type="button" class="choice-card plan-choice" data-plan="lean_muscle_gain">
-                <strong>Muscle</strong>
+                <strong>Muscle plan</strong>
                 <span>Hypertrophy</span>
               </button>
               <button type="button" class="choice-card plan-choice" data-plan="athletic_recomp">
-                <strong>Athletic</strong>
-                <span>Strength + conditioning</span>
+                <strong>Athletic plan</strong>
+                <span>Conditioning</span>
               </button>
             </div>
           </div>
         </section>
 
-        <div class="optional-grid">
+        <section class="zen-panel intake-panel custom-step" data-flow-step="custom">
+          <div class="custom-intro">
+            <p class="section-eyebrow">Optional</p>
+            <h2>Already following a plan?</h2>
+            <p>Add it if you want a more tailored preview, or skip and create your timeline now.</p>
+          </div>
+
+          <div class="optional-grid compact-options">
           <details class="expand-card">
-            <summary>Use my own plan</summary>
+            <summary>Add workout or diet</summary>
             <label class="field-card field-card-wide">
               <span>Workout</span>
-              <textarea name="customWorkout" rows="3" placeholder="4x resistance training + 2 walks"></textarea>
+              <textarea name="customWorkout" rows="3" placeholder="4x lifting + 2 walks"></textarea>
             </label>
             <label class="field-card field-card-wide">
               <span>Diet</span>
-              <textarea name="customDiet" rows="3" placeholder="High protein, calorie deficit, whole foods"></textarea>
+              <textarea name="customDiet" rows="3" placeholder="High protein, calorie deficit"></textarea>
             </label>
           </details>
 
           <details class="expand-card">
-            <summary>Add consistency details</summary>
+            <summary>Add consistency</summary>
             <div class="grid compact-grid">
               <label class="field-card">
                 <span>Days / week</span>
                 <input name="workoutDaysPerWeek" type="number" inputmode="numeric" min="0" max="14" placeholder="4" />
               </label>
               <label class="field-card">
-                <span>Workout consistency</span>
-                <input name="workoutAdherence" type="number" inputmode="numeric" min="0" max="100" placeholder="80%" />
+                <span>Workout %</span>
+                <input name="workoutAdherence" type="number" inputmode="numeric" min="0" max="100" placeholder="80" />
               </label>
               <label class="field-card">
-                <span>Diet consistency</span>
-                <input name="dietAdherence" type="number" inputmode="numeric" min="0" max="100" placeholder="75%" />
+                <span>Diet %</span>
+                <input name="dietAdherence" type="number" inputmode="numeric" min="0" max="100" placeholder="75" />
               </label>
               <label class="field-card">
                 <span>Weeks done</span>
@@ -205,13 +231,16 @@
               </label>
             </div>
           </details>
-        </div>
-
-        <div class="submit-row">
-          <div class="submit-copy">
-            <p class="submit-title">Create your preview</p>
-            <p class="submit-text">Two milestones, one restrained comparison.</p>
           </div>
+        </section>
+
+        <div class="submit-row flow-actions">
+          <div class="submit-copy">
+            <p class="submit-title" id="flowActionTitle">Add photo and details</p>
+            <p class="submit-text" id="flowActionText">Then choose your goal.</p>
+          </div>
+          <button id="flowBackBtn" type="button" class="secondary-btn hidden">Back</button>
+          <button id="flowNextBtn" type="button">Next</button>
           <button id="submitBtn" type="submit">Create Preview</button>
         </div>
       </form>
@@ -243,7 +272,7 @@
               <p class="result-kicker">Timeline</p>
               <h2>Current, 6 months, 1 year</h2>
             </div>
-            <div class="result-chip">Current to 1 year</div>
+            <div class="result-chip">Tap image</div>
           </div>
           <div class="result-stage">
             <img id="resultStageImage" alt="Selected transformation stage" />
@@ -266,7 +295,7 @@
           <div class="social-export unified-export">
             <div class="social-export-head">
               <div>
-                <p>Instagram Export</p>
+                <p>Share image</p>
                 <span id="unifiedExportHint">Create a post from the selected timeline stage</span>
               </div>
               <select id="resultSocialFormat" aria-label="Instagram format for selected result">
@@ -278,7 +307,7 @@
               <img id="socialPreviewSelected" class="social-preview" alt="Instagram-ready selected comparison" />
             </div>
             <div class="social-actions">
-              <button type="button" id="generateSocialSelected" class="secondary-btn">Create Share Image</button>
+              <button type="button" id="generateSocialSelected" class="secondary-btn">Prepare Story / Download</button>
               <button type="button" id="saveSocialSelected" class="secondary-btn hidden">Download</button>
               <button type="button" id="downloadSocialSelected" class="secondary-btn hidden">Open Instagram</button>
               <button type="button" id="shareSocialSelected" class="secondary-btn hidden">Share</button>
@@ -287,13 +316,6 @@
         </article>
 
         <article class="result-card legacy-result-card">
-          <div class="result-head">
-            <div>
-              <p class="result-kicker">Milestone</p>
-              <h2>6-Month Preview</h2>
-            </div>
-            <div class="result-chip">Compare</div>
-          </div>
           <div class="compare-frame">
             <img id="before6m" class="compare-image compare-image-before" alt="Current photo" />
             <div id="compareAfterWrap6m" class="compare-after-wrap">
@@ -301,40 +323,19 @@
             </div>
           </div>
           <input id="compareRange6m" class="compare-range" type="range" min="0" max="100" value="50" aria-label="Compare before and after - 6 months" />
-          <div class="compare-legend">
-            <span>Current</span>
-            <span>6 months</span>
+          <select id="socialFormat6m" aria-label="Instagram format for 6-month result">
+            <option value="story">Story</option>
+            <option value="post">Post</option>
+          </select>
+          <div class="social-preview-wrap hidden" id="socialPreviewWrap6m">
+            <img id="socialPreview6m" class="social-preview" alt="Instagram-ready 6-month comparison" />
           </div>
-          <div class="social-export">
-            <div class="social-export-head">
-              <div>
-                <p>Instagram Export</p>
-                <span>Generate a polished story or feed post</span>
-              </div>
-              <select id="socialFormat6m" aria-label="Instagram format for 6-month result">
-                <option value="story">Story</option>
-                <option value="post">Post</option>
-              </select>
-            </div>
-            <div class="social-preview-wrap hidden" id="socialPreviewWrap6m">
-              <img id="socialPreview6m" class="social-preview" alt="Instagram-ready 6-month comparison" />
-            </div>
-            <div class="social-actions">
-              <button type="button" id="generateSocial6m" class="secondary-btn">Design Post</button>
-              <button type="button" id="downloadSocial6m" class="secondary-btn hidden">Open Instagram</button>
-              <button type="button" id="shareSocial6m" class="secondary-btn hidden">Share</button>
-            </div>
-          </div>
+          <button type="button" id="generateSocial6m" class="secondary-btn">Design Post</button>
+          <button type="button" id="downloadSocial6m" class="secondary-btn hidden">Open Instagram</button>
+          <button type="button" id="shareSocial6m" class="secondary-btn hidden">Share</button>
         </article>
 
         <article class="result-card legacy-result-card">
-          <div class="result-head">
-            <div>
-              <p class="result-kicker">Milestone</p>
-              <h2>1-Year Preview</h2>
-            </div>
-            <div class="result-chip">Compare</div>
-          </div>
           <div class="compare-frame">
             <img id="before1y" class="compare-image compare-image-before" alt="Current photo" />
             <div id="compareAfterWrap1y" class="compare-after-wrap">
@@ -342,30 +343,16 @@
             </div>
           </div>
           <input id="compareRange1y" class="compare-range" type="range" min="0" max="100" value="50" aria-label="Compare before and after - 1 year" />
-          <div class="compare-legend">
-            <span>Current</span>
-            <span>1 year</span>
+          <select id="socialFormat1y" aria-label="Instagram format for 1-year result">
+            <option value="story">Story</option>
+            <option value="post">Post</option>
+          </select>
+          <div class="social-preview-wrap hidden" id="socialPreviewWrap1y">
+            <img id="socialPreview1y" class="social-preview" alt="Instagram-ready 1-year comparison" />
           </div>
-          <div class="social-export">
-            <div class="social-export-head">
-              <div>
-                <p>Instagram Export</p>
-                <span>Generate a polished story or feed post</span>
-              </div>
-              <select id="socialFormat1y" aria-label="Instagram format for 1-year result">
-                <option value="story">Story</option>
-                <option value="post">Post</option>
-              </select>
-            </div>
-            <div class="social-preview-wrap hidden" id="socialPreviewWrap1y">
-              <img id="socialPreview1y" class="social-preview" alt="Instagram-ready 1-year comparison" />
-            </div>
-            <div class="social-actions">
-              <button type="button" id="generateSocial1y" class="secondary-btn">Design Post</button>
-              <button type="button" id="downloadSocial1y" class="secondary-btn hidden">Open Instagram</button>
-              <button type="button" id="shareSocial1y" class="secondary-btn hidden">Share</button>
-            </div>
-          </div>
+          <button type="button" id="generateSocial1y" class="secondary-btn">Design Post</button>
+          <button type="button" id="downloadSocial1y" class="secondary-btn hidden">Open Instagram</button>
+          <button type="button" id="shareSocial1y" class="secondary-btn hidden">Share</button>
         </article>
       </section>
 
@@ -392,6 +379,15 @@
               <span id="exportSheetSubtitle">Download it or open Instagram.</span>
             </div>
             <button id="closeExportSheet" type="button" class="secondary-btn image-viewer-close" aria-label="Close export options">Close</button>
+          </div>
+          <div class="export-filters" aria-label="Choose share image filter">
+            <button type="button" class="export-filter filter-classic is-selected" data-export-filter="classic">Classic</button>
+            <button type="button" class="export-filter filter-cinematic" data-export-filter="cinematic">Cinematic</button>
+            <button type="button" class="export-filter filter-sunset" data-export-filter="sunset">Sunset</button>
+            <button type="button" class="export-filter filter-cyber" data-export-filter="cyber">Cyber</button>
+            <button type="button" class="export-filter filter-ice" data-export-filter="ice">Ice</button>
+            <button type="button" class="export-filter filter-grain" data-export-filter="grain">Grain</button>
+            <button type="button" class="export-filter filter-mono" data-export-filter="mono">Mono</button>
           </div>
           <img id="exportSheetPreview" alt="Generated Instagram-ready preview" />
           <div class="social-actions export-sheet-actions">

@@ -10,6 +10,10 @@ const img1y = document.getElementById("img1y");
 const before6m = document.getElementById("before6m");
 const before1y = document.getElementById("before1y");
 const submitBtn = document.getElementById("submitBtn");
+const flowBackBtn = document.getElementById("flowBackBtn");
+const flowNextBtn = document.getElementById("flowNextBtn");
+const flowActionTitle = document.getElementById("flowActionTitle");
+const flowActionText = document.getElementById("flowActionText");
 const compareRange6m = document.getElementById("compareRange6m");
 const compareRange1y = document.getElementById("compareRange1y");
 const compareAfterWrap6m = document.getElementById("compareAfterWrap6m");
@@ -52,8 +56,11 @@ const closeExportSheet = document.getElementById("closeExportSheet");
 const sheetDownloadBtn = document.getElementById("sheetDownloadBtn");
 const sheetInstagramBtn = document.getElementById("sheetInstagramBtn");
 const sheetShareBtn = document.getElementById("sheetShareBtn");
+const exportFilterButtons = document.querySelectorAll(".export-filter");
 const photoInput = document.getElementById("photo");
 const uploadBtn = document.getElementById("uploadBtn");
+const changeUploadBtn = document.getElementById("changeUploadBtn");
+const changeCameraBtn = document.getElementById("changeCameraBtn");
 const openCameraBtn = document.getElementById("openCameraBtn");
 const captureBtn = document.getElementById("captureBtn");
 const cancelCameraBtn = document.getElementById("cancelCameraBtn");
@@ -66,6 +73,11 @@ const selectedPlanIdInput = document.getElementById("selectedPlanId");
 const goalInput = document.getElementById("goalInput");
 const planChoiceButtons = document.querySelectorAll(".plan-choice");
 const goalChoiceButtons = document.querySelectorAll(".goal-choice");
+const tryYourselfBtn = document.getElementById("tryYourselfBtn");
+const demoStageImage = document.getElementById("demoStageImage");
+const demoStageLabel = document.getElementById("demoStageLabel");
+const demoTabButtons = document.querySelectorAll(".demo-tab");
+const customOptionDetails = document.querySelectorAll(".custom-step details");
 
 let cameraStream = null;
 let capturedPhotoFile = null;
@@ -84,10 +96,27 @@ const viewerSources = {
   oneYear: ""
 };
 let selectedResultStage = "current";
+let statusTimer = null;
 const viewerLabels = {
   current: "Current",
   sixMonths: "6 months",
   oneYear: "1 year"
+};
+let demoAutoplayTimer = null;
+let demoAutoplayIndex = 0;
+let demoUserInteracted = false;
+let selectedExportFilter = "classic";
+let lastSelectedExportConfig = null;
+const goalToPlanMap = {
+  "lose fat and get leaner": "beginner_fat_loss",
+  "gain lean muscle": "lean_muscle_gain",
+  "lose fat and gain muscle definition": "athletic_recomp"
+};
+const flowSteps = ["photo", "goals", "custom"];
+const flowCopy = {
+  photo: ["Add photo and details", "Next: choose your goal."],
+  goals: ["Choose goal and plan", "Next: add your own plan if you have one."],
+  custom: ["Own plan is optional", "Generate your timeline when ready."]
 };
 
 function initializeView() {
@@ -105,6 +134,90 @@ function initializeView() {
   statusEl.textContent = "";
   syncPlanChoiceState();
   syncGoalChoiceState();
+  setFlowStep("photo");
+}
+
+function openIntakeFlow() {
+  form.classList.remove("hidden");
+  form.classList.add("is-open");
+  document.body.classList.add("flow-active");
+  setFlowStep("photo");
+  tryYourselfBtn?.setAttribute("aria-expanded", "true");
+}
+
+function setFlowStep(step) {
+  form.dataset.step = step;
+  const stepIndex = flowSteps.indexOf(step);
+  const [title, text] = flowCopy[step] || flowCopy.photo;
+  if (flowActionTitle) {
+    flowActionTitle.textContent = title;
+  }
+  if (flowActionText) {
+    flowActionText.textContent = text;
+  }
+  flowBackBtn?.classList.toggle("hidden", stepIndex <= 0);
+  flowNextBtn?.classList.toggle("hidden", step === "custom");
+  submitBtn?.classList.toggle("hidden", step !== "custom");
+  document.querySelectorAll(".flow-pills span").forEach((pill, index) => {
+    pill.classList.toggle("is-active", index === stepIndex);
+    pill.classList.toggle("is-complete", index < stepIndex);
+  });
+}
+
+function getCurrentFlowStep() {
+  return form.dataset.step || "photo";
+}
+
+function goToNextFlowStep() {
+  const currentStep = getCurrentFlowStep();
+  if (currentStep === "photo") {
+    const uploadedFile = photoInput.files?.[0];
+    if (!capturedPhotoFile && !uploadedFile) {
+      setStatus("Add one photo first.", true);
+      return;
+    }
+  }
+  if (currentStep === "goals" && !selectedPlanIdInput.value && !goalInput.value.trim()) {
+    setStatus("Choose fat loss, muscle gain, or recomp.", true);
+    return;
+  }
+  const nextStep = flowSteps[Math.min(flowSteps.indexOf(currentStep) + 1, flowSteps.length - 1)];
+  setStatus("");
+  setFlowStep(nextStep);
+}
+
+function goToPreviousFlowStep() {
+  const currentStep = getCurrentFlowStep();
+  const previousStep = flowSteps[Math.max(flowSteps.indexOf(currentStep) - 1, 0)];
+  setStatus("");
+  setFlowStep(previousStep);
+}
+
+function setDemoStageFromButton(button) {
+  if (!demoStageImage || !demoStageLabel || !button) {
+    return;
+  }
+  demoStageImage.src = button.dataset.demoSrc || "";
+  demoStageImage.alt = button.dataset.demoAlt || "Example transformation stage";
+  demoStageLabel.textContent = button.dataset.demoLabel || "Preview";
+  demoTabButtons.forEach((tabButton) => {
+    tabButton.classList.toggle("is-selected", tabButton === button);
+  });
+}
+
+function startDemoAutoplay() {
+  if (!demoTabButtons.length) {
+    return;
+  }
+  demoAutoplayTimer = window.setInterval(() => {
+    if (demoUserInteracted) {
+      window.clearInterval(demoAutoplayTimer);
+      demoAutoplayTimer = null;
+      return;
+    }
+    demoAutoplayIndex = (demoAutoplayIndex + 1) % demoTabButtons.length;
+    setDemoStageFromButton(demoTabButtons[demoAutoplayIndex]);
+  }, 2200);
 }
 
 function setSelectedButton(buttons, selectedButton) {
@@ -198,8 +311,21 @@ function renderTransformationData(payload) {
 }
 
 function setStatus(message, isError = false) {
+  if (statusTimer) {
+    window.clearTimeout(statusTimer);
+    statusTimer = null;
+  }
   statusEl.textContent = message;
+  statusEl.classList.toggle("is-error", isError);
   statusEl.style.color = isError ? "#b42318" : "#4c5568";
+  const shouldAutoClear = Boolean(message);
+  if (shouldAutoClear) {
+    statusTimer = window.setTimeout(() => {
+      statusEl.textContent = "";
+      statusEl.classList.remove("is-error");
+      statusTimer = null;
+    }, isError ? 3600 : 2200);
+  }
 }
 
 function setComparePosition(rangeInput, afterWrap) {
@@ -240,6 +366,7 @@ function setPreview(url) {
   currentOriginalExportSrc = url;
   selectedPreview.src = url;
   previewWrap.classList.remove("hidden");
+  form.classList.add("has-photo");
 }
 
 function setBeforeAndAfterSources(after6mUrl, after1yUrl, beforeUrl) {
@@ -345,6 +472,43 @@ function openExportSheet() {
   sheetShareBtn.classList.toggle("hidden", shareSocialSelected.classList.contains("hidden"));
   exportSheet.classList.remove("hidden");
   document.body.classList.add("viewer-open");
+}
+
+function syncExportFilterButtons() {
+  exportFilterButtons.forEach((button) => {
+    button.classList.toggle("is-selected", button.dataset.exportFilter === selectedExportFilter);
+  });
+}
+
+async function rerenderSelectedExportFilter() {
+  if (!lastSelectedExportConfig) {
+    return;
+  }
+  exportFilterButtons.forEach((button) => {
+    button.disabled = true;
+  });
+  try {
+    await renderSocialAsset({
+      key: "selected",
+      beforeSrc: lastSelectedExportConfig.beforeSrc,
+      afterSrc: lastSelectedExportConfig.afterSrc,
+      timelineLabel: lastSelectedExportConfig.timelineLabel,
+      formatSelect: resultSocialFormat,
+      previewEl: socialPreviewSelected,
+      wrapEl: socialPreviewWrapSelected,
+      downloadBtnEl: downloadSocialSelected,
+      shareBtnEl: shareSocialSelected,
+      filter: selectedExportFilter
+    });
+    saveSocialSelected.classList.remove("hidden");
+    openExportSheet();
+  } catch (error) {
+    setStatus(error.message || "Could not apply that filter.", true);
+  } finally {
+    exportFilterButtons.forEach((button) => {
+      button.disabled = false;
+    });
+  }
 }
 
 function closeSheet({ resetInline = false } = {}) {
@@ -505,6 +669,75 @@ function drawAccentRule(ctx, x, y, width) {
   ctx.restore();
 }
 
+function getExportFilterStyle(filter) {
+  const styles = {
+    classic: {
+      imageFilter: "none",
+      overlay: "rgba(0, 0, 0, 0)",
+      title: "Quiet progress.",
+      subtitle: `Current vs projected {timeline} progress`,
+      footerTitle: "Made from your photo",
+      footerBody: "A simple progress mockup for your next checkpoint. Train, eat, recover, repeat.",
+      cta: format => format === "story" ? "READY FOR STORIES" : "READY FOR THE FEED"
+    },
+    cinematic: {
+      imageFilter: "contrast(1.16) saturate(0.92) brightness(0.94)",
+      overlay: "rgba(10, 18, 28, 0.16)",
+      title: "Main character arc.",
+      subtitle: `{timeline} later. Same frame, stronger story.`,
+      footerTitle: "Shot like a training scene",
+      footerBody: "Not magic. Just the kind of frame you earn rep by rep.",
+      cta: format => format === "story" ? "STORY MODE: ON" : "POST THE ARC"
+    },
+    sunset: {
+      imageFilter: "sepia(0.24) saturate(1.34) contrast(1.05) brightness(1.03)",
+      overlay: "rgba(241, 135, 45, 0.13)",
+      title: "Golden hour gains.",
+      subtitle: `A warmer look at {timeline} progress`,
+      footerTitle: "Soft light, hard work",
+      footerBody: "A warmer checkpoint for the days when progress starts showing up.",
+      cta: format => format === "story" ? "GOLDEN STORY READY" : "WARM FEED READY"
+    },
+    cyber: {
+      imageFilter: "saturate(1.6) contrast(1.12) brightness(0.98)",
+      overlay: "rgba(92, 80, 255, 0.12)",
+      title: "Upgrade loaded.",
+      subtitle: `{timeline} transformation protocol active`,
+      footerTitle: "Next build in progress",
+      footerBody: "A high-energy checkpoint for the version you are building.",
+      cta: format => format === "story" ? "UPLOAD THE UPGRADE" : "SYSTEM READY TO POST"
+    },
+    ice: {
+      imageFilter: "saturate(0.9) contrast(1.08) brightness(1.05)",
+      overlay: "rgba(80, 170, 255, 0.13)",
+      title: "Cold focus.",
+      subtitle: `Clean {timeline} progress preview`,
+      footerTitle: "Calm look, serious change",
+      footerBody: "Clean tones for a progress check that does not need to shout.",
+      cta: format => format === "story" ? "CRISP STORY READY" : "CLEAN FEED READY"
+    },
+    grain: {
+      imageFilter: "sepia(0.12) contrast(1.18) saturate(0.86)",
+      overlay: "rgba(245, 239, 230, 0.06)",
+      title: "Film roll progress.",
+      subtitle: `{timeline} later, shot like a memory`,
+      footerTitle: "Progress with texture",
+      footerBody: "A raw checkpoint with a little grain, like a frame from the process.",
+      cta: format => format === "story" ? "FILM STORY READY" : "POST THE FRAME"
+    },
+    mono: {
+      imageFilter: "grayscale(0.86) contrast(1.12)",
+      overlay: "rgba(245, 239, 230, 0.05)",
+      title: "No noise. Progress.",
+      subtitle: `Minimal {timeline} transformation view`,
+      footerTitle: "Simple and direct",
+      footerBody: "A clean progress check. No hype, just the next target.",
+      cta: format => format === "story" ? "MINIMAL STORY READY" : "MONO FEED READY"
+    }
+  };
+  return styles[filter] || styles.classic;
+}
+
 function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 3) {
   const words = text.split(" ");
   let line = "";
@@ -529,7 +762,10 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 3) {
   }
 }
 
-async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, format }) {
+async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, format, filter = "classic" }) {
+  const filterStyle = getExportFilterStyle(filter);
+  const timelineText = timelineLabel.toLowerCase();
+  const subtitleText = filterStyle.subtitle.replace("{timeline}", timelineText);
   const size = format === "story"
     ? { width: 1080, height: 1920, imageHeight: 950, gap: 34, sidePad: 60, topPad: 82 }
     : { width: 1080, height: 1350, imageHeight: 650, gap: 28, sidePad: 56, topPad: 56 };
@@ -540,6 +776,10 @@ async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, form
   const ctx = canvas.getContext("2d");
 
   fillGradientBackground(ctx, size.width, size.height);
+  if (filterStyle.overlay !== "rgba(0, 0, 0, 0)") {
+    ctx.fillStyle = filterStyle.overlay;
+    ctx.fillRect(0, 0, size.width, size.height);
+  }
 
   const outerX = 28;
   const outerY = 28;
@@ -551,11 +791,19 @@ async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, form
 
   ctx.fillStyle = "#f5efe6";
   ctx.font = format === "story" ? "900 86px Sora, Arial, sans-serif" : "900 70px Sora, Arial, sans-serif";
-  ctx.fillText("Quiet progress.", size.sidePad, size.topPad + (format === "story" ? 166 : 146));
+  drawWrappedText(
+    ctx,
+    filterStyle.title,
+    size.sidePad,
+    size.topPad + (format === "story" ? 166 : 146),
+    size.width - size.sidePad * 2,
+    format === "story" ? 88 : 72,
+    2
+  );
 
   ctx.fillStyle = "#a8a096";
   ctx.font = format === "story" ? "600 32px Sora, Arial, sans-serif" : "600 27px Sora, Arial, sans-serif";
-  ctx.fillText(`Current vs projected ${timelineLabel.toLowerCase()} progress`, size.sidePad, size.topPad + (format === "story" ? 218 : 192));
+  ctx.fillText(subtitleText, size.sidePad, size.topPad + (format === "story" ? 218 : 192));
   drawAccentRule(ctx, size.sidePad, size.topPad + (format === "story" ? 250 : 222), size.width - size.sidePad * 2);
 
   const cardY = size.topPad + (format === "story" ? 306 : 258);
@@ -574,8 +822,11 @@ async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, form
   ctx.restore();
 
   const [beforeImage, afterImage] = await Promise.all([loadImage(beforeSrc), loadImage(afterSrc)]);
+  ctx.save();
+  ctx.filter = filterStyle.imageFilter;
   drawCoverImage(ctx, beforeImage, size.sidePad, cardY, cardWidth, size.imageHeight, cardRadius);
   drawCoverImage(ctx, afterImage, size.sidePad + cardWidth + size.gap, cardY, cardWidth, size.imageHeight, cardRadius);
+  ctx.restore();
 
   ctx.strokeStyle = "rgba(245, 239, 230, 0.24)";
   ctx.lineWidth = 3;
@@ -603,13 +854,13 @@ async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, form
 
   ctx.fillStyle = "#f5efe6";
   ctx.font = format === "story" ? "800 46px Sora, Arial, sans-serif" : "800 38px Sora, Arial, sans-serif";
-  ctx.fillText("Transformation preview", size.sidePad + 34, footerY + 66);
+  ctx.fillText(filterStyle.footerTitle, size.sidePad + 34, footerY + 66);
 
   ctx.fillStyle = "#a8a096";
   ctx.font = format === "story" ? "500 28px Sora, Arial, sans-serif" : "500 23px Sora, Arial, sans-serif";
   drawWrappedText(
     ctx,
-    "A personalized visual estimate. Real progress depends on consistency, training, nutrition, and recovery.",
+    filterStyle.footerBody,
     size.sidePad + 34,
     footerY + 116,
     size.width - size.sidePad * 2 - 68,
@@ -620,7 +871,7 @@ async function createSocialComparison({ beforeSrc, afterSrc, timelineLabel, form
   drawAccentRule(ctx, size.sidePad + 34, footerY + footerHeight - 70, size.width - size.sidePad * 2 - 68);
   ctx.fillStyle = "#f1872d";
   ctx.font = format === "story" ? "900 32px Sora, Arial, sans-serif" : "900 28px Sora, Arial, sans-serif";
-  ctx.fillText(format === "story" ? "READY FOR STORIES" : "READY FOR THE FEED", size.sidePad + 34, footerY + footerHeight - 30);
+  ctx.fillText(filterStyle.cta(format), size.sidePad + 34, footerY + footerHeight - 30);
 
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -642,18 +893,20 @@ async function renderSocialAsset({
   previewEl,
   wrapEl,
   downloadBtnEl,
-  shareBtnEl
+  shareBtnEl,
+  filter = "classic"
 }) {
   clearSocialAsset(key, previewEl, wrapEl, downloadBtnEl, shareBtnEl);
   const blob = await createSocialComparison({
     beforeSrc,
     afterSrc,
     timelineLabel,
-    format: formatSelect.value
+    format: formatSelect.value,
+    filter
   });
   const objectUrl = URL.createObjectURL(blob);
   const safeTimeline = timelineLabel.toLowerCase().replace(/\s+/g, "-");
-  const filename = `my-gym-${safeTimeline}-${formatSelect.value}.png`;
+  const filename = `my-gym-${safeTimeline}-${formatSelect.value}-${filter}.png`;
 
   socialAssets[key] = {
     blob,
@@ -818,6 +1071,25 @@ uploadBtn.addEventListener("click", () => {
   photoInput.click();
 });
 
+changeUploadBtn?.addEventListener("click", () => {
+  photoInput.click();
+});
+
+changeCameraBtn?.addEventListener("click", async () => {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    setStatus("Camera not supported here. Please use Upload Photo.", true);
+    return;
+  }
+  try {
+    currentFacingMode = cameraFacing.value || "user";
+    await startCamera(currentFacingMode);
+    form.classList.remove("has-photo");
+    setStatus("Camera is ready. Tap Use Photo when it looks good.");
+  } catch (error) {
+    setStatus("Could not open camera. Please allow permission or use Upload Photo.", true);
+  }
+});
+
 photoInput.addEventListener("change", async () => {
   if (!photoInput.files || !photoInput.files[0]) {
     return;
@@ -902,12 +1174,45 @@ planChoiceButtons.forEach((button) => {
 goalChoiceButtons.forEach((button) => {
   button.addEventListener("click", () => {
     goalInput.value = button.dataset.goal || "";
+    const matchingPlan = goalToPlanMap[goalInput.value];
+    if (matchingPlan) {
+      selectedPlanIdInput.value = matchingPlan;
+      syncPlanChoiceState();
+    }
     syncGoalChoiceState();
   });
 });
 
 selectedPlanIdInput.addEventListener("change", syncPlanChoiceState);
 goalInput.addEventListener("input", syncGoalChoiceState);
+
+tryYourselfBtn?.addEventListener("click", openIntakeFlow);
+flowNextBtn?.addEventListener("click", goToNextFlowStep);
+flowBackBtn?.addEventListener("click", goToPreviousFlowStep);
+
+demoTabButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    demoUserInteracted = true;
+    if (demoAutoplayTimer) {
+      window.clearInterval(demoAutoplayTimer);
+      demoAutoplayTimer = null;
+    }
+    setDemoStageFromButton(button);
+  });
+});
+
+customOptionDetails.forEach((details) => {
+  details.addEventListener("toggle", () => {
+    if (!details.open) {
+      return;
+    }
+    customOptionDetails.forEach((otherDetails) => {
+      if (otherDetails !== details) {
+        otherDetails.open = false;
+      }
+    });
+  });
+});
 
 generateSocial6m.addEventListener("click", async () => {
   if (!before6m.src || !img6m.src) {
@@ -976,6 +1281,14 @@ resultSocialFormat.addEventListener("change", () => {
   saveSocialSelected.classList.add("hidden");
 });
 
+exportFilterButtons.forEach((button) => {
+  button.addEventListener("click", async () => {
+    selectedExportFilter = button.dataset.exportFilter || "classic";
+    syncExportFilterButtons();
+    await rerenderSelectedExportFilter();
+  });
+});
+
 downloadSocial6m.addEventListener("click", () => {
   openInstagramAfterExport("sixMonths", socialFormat6m);
 });
@@ -1011,6 +1324,7 @@ generateSocialSelected.addEventListener("click", async () => {
     return;
   }
   try {
+    lastSelectedExportConfig = config;
     generateSocialSelected.disabled = true;
     setStatus(`Creating your ${config.timelineLabel.toLowerCase()} share image...`);
     await renderSocialAsset({
@@ -1022,7 +1336,8 @@ generateSocialSelected.addEventListener("click", async () => {
       previewEl: socialPreviewSelected,
       wrapEl: socialPreviewWrapSelected,
       downloadBtnEl: downloadSocialSelected,
-      shareBtnEl: shareSocialSelected
+      shareBtnEl: shareSocialSelected,
+      filter: selectedExportFilter
     });
     saveSocialSelected.classList.remove("hidden");
     openExportSheet();
@@ -1099,6 +1414,7 @@ form.addEventListener("submit", async (event) => {
   data.set("photo", finalPhoto);
 
   submitBtn.disabled = true;
+  form.classList.add("hidden");
   resultsEl.classList.add("hidden");
   transformationDataEl.classList.add("hidden");
   clearSocialAsset("sixMonths", socialPreview6m, socialPreviewWrap6m, downloadSocial6m, shareSocial6m);
@@ -1123,6 +1439,7 @@ form.addEventListener("submit", async (event) => {
     renderTransformationData(payload);
     if (payload.sixMonthsImage && payload.oneYearImage) {
       setBeforeAndAfterSources(payload.sixMonthsImage, payload.oneYearImage, currentOriginalImageSrc || selectedPreview.src);
+      form.classList.add("hidden");
       resultsEl.classList.remove("hidden");
       syncCompareImageWidth(compareAfterWrap6m);
       syncCompareImageWidth(compareAfterWrap1y);
@@ -1130,6 +1447,9 @@ form.addEventListener("submit", async (event) => {
     setLoading(false);
     setStatus(payload.note || "Your preview is ready.");
   } catch (error) {
+    form.classList.remove("hidden");
+    document.body.classList.add("flow-active");
+    setFlowStep("custom");
     setStatus(error.message || "Something went wrong.", true);
   } finally {
     setLoading(false);
@@ -1154,3 +1474,4 @@ window.addEventListener("resize", () => {
 });
 
 initializeView();
+startDemoAutoplay();
