@@ -1156,6 +1156,7 @@ async function stopCamera() {
   }
   cameraFeed.srcObject = null;
   cameraWrap.classList.add("hidden");
+  form.classList.remove("camera-active");
 }
 
 async function startCamera(facingMode) {
@@ -1166,6 +1167,7 @@ async function startCamera(facingMode) {
   });
   cameraFeed.srcObject = cameraStream;
   cameraWrap.classList.remove("hidden");
+  form.classList.add("camera-active");
 }
 
 uploadBtn.addEventListener("click", () => {

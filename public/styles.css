@@ -3502,6 +3502,74 @@ body {
   width: 100%;
 }
 
+.intake-flow.camera-active[data-step="photo"] {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.intake-flow.camera-active .details-step,
+.intake-flow.camera-active .photo-topbar,
+.intake-flow.camera-active .photo-actions,
+.intake-flow.camera-active .upload-preview {
+  display: none;
+}
+
+.intake-flow.camera-active .photo-step {
+  min-height: 0;
+  align-self: stretch;
+}
+
+.intake-flow.camera-active .photo-step .photo-block {
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  align-content: stretch;
+}
+
+.intake-flow.camera-active .camera-wrap {
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.intake-flow.camera-active #cameraFeed {
+  width: min(100%, 430px);
+  height: min(58svh, 620px);
+  max-height: none;
+  justify-self: center;
+  border: 1px solid rgba(245, 239, 230, 0.16);
+  border-radius: 28px;
+  object-fit: cover;
+  background: #000;
+  box-shadow:
+    0 28px 80px rgba(0, 0, 0, 0.45),
+    0 0 56px rgba(241, 135, 45, 0.16);
+}
+
+.intake-flow.camera-active .camera-controls {
+  width: min(100%, 430px);
+  justify-self: center;
+  grid-template-columns: 1.2fr 0.8fr;
+}
+
+.intake-flow.camera-active .camera-controls button {
+  min-height: 56px;
+  border-radius: var(--radius-md);
+}
+
+.intake-flow.camera-active .flow-actions {
+  display: none !important;
+}
+
 .photo-step .upload-preview {
   border: 0;
   background: transparent;
@@ -3655,6 +3723,33 @@ body {
 
   .photo-step .action-btn {
     min-height: 58px;
+  }
+
+  .intake-flow.camera-active {
+    padding: var(--space-2);
+  }
+
+  .intake-flow.camera-active .flow-head {
+    display: none;
+  }
+
+  .intake-flow.camera-active[data-step="photo"] {
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .intake-flow.camera-active #cameraFeed {
+    width: min(100%, 420px);
+    height: calc(100svh - 8.5rem);
+    border-radius: 24px;
+  }
+
+  .intake-flow.camera-active .camera-wrap {
+    gap: var(--space-2);
+  }
+
+  .intake-flow.camera-active .camera-controls {
+    width: 100%;
+    grid-template-columns: 1fr 1fr;
   }
 
   .details-step .profile-grid {
