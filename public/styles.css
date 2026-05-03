@@ -3534,6 +3534,29 @@ body {
   animation: selectedImageFloat 5.2s ease-in-out infinite;
 }
 
+.photo-step .upload-preview.preview-error img {
+  display: none;
+}
+
+.photo-step .upload-preview.preview-error::before {
+  content: attr(data-error);
+  width: min(100%, 320px);
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  border: 1px solid rgba(241, 135, 45, 0.28);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(241, 135, 45, 0.16), transparent 52%),
+    rgba(12, 12, 11, 0.86);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-align: center;
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.34);
+}
+
 .change-photo-btn {
   min-height: 38px;
   padding: 0.55rem 0.9rem;

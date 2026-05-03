@@ -357,19 +357,36 @@ function setLoading(isLoading, message = "Creating your transformation...") {
   }
 }
 
-function setPreview(url, exportUrl = url) {
+function setPreviewError(message = "Photo could not load. Try another image.") {
+  selectedPreview.removeAttribute("src");
+  selectedPreview.alt = "";
+  selectedPreview.classList.remove("is-loaded");
+  previewWrap.dataset.error = message;
+  previewWrap.classList.add("preview-error");
+  previewWrap.classList.remove("hidden");
+  form.classList.add("has-photo");
+}
+
+function setPreview(url, exportUrl = url, fallbackUrl = "") {
   if (currentPreviewUrl && currentPreviewUrl.startsWith("blob:")) {
     URL.revokeObjectURL(currentPreviewUrl);
   }
   currentPreviewUrl = url;
   currentOriginalImageSrc = url;
   currentOriginalExportSrc = exportUrl;
+  previewWrap.classList.remove("preview-error");
+  delete previewWrap.dataset.error;
+  selectedPreview.alt = "Selected photo preview";
   selectedPreview.classList.remove("is-loaded");
   selectedPreview.onload = () => {
     selectedPreview.classList.add("is-loaded");
   };
   selectedPreview.onerror = () => {
-    selectedPreview.classList.remove("is-loaded");
+    if (fallbackUrl && fallbackUrl !== url) {
+      setPreview(fallbackUrl, exportUrl);
+      return;
+    }
+    setPreviewError();
     setStatus("Could not show that photo. Try uploading another image.", true);
   };
   selectedPreview.src = url;
@@ -1107,18 +1124,13 @@ photoInput.addEventListener("change", async () => {
   try {
     const file = photoInput.files[0];
     const objectUrl = URL.createObjectURL(file);
-    setPreview(objectUrl);
-    fileToDataUrl(file)
-      .then((dataUrl) => {
-        if (currentPreviewUrl === objectUrl) {
-          currentOriginalExportSrc = dataUrl;
-        }
-      })
-      .catch(() => {
-        if (currentPreviewUrl === objectUrl) {
-          currentOriginalExportSrc = objectUrl;
-        }
-      });
+    let dataUrl = "";
+    try {
+      dataUrl = await fileToDataUrl(file);
+    } catch {
+      dataUrl = "";
+    }
+    setPreview(objectUrl, dataUrl || objectUrl, dataUrl);
     setStatus("Photo added.");
   } catch (error) {
     setStatus(error.message || "Could not preview the selected photo.", true);
@@ -1242,7 +1254,7 @@ generateSocial6m.addEventListener("click", async () => {
     setStatus("Creating your 6-month share image...");
     await renderSocialAsset({
       key: "sixMonths",
-      beforeSrc: currentOriginalImageSrc || before6m.src,
+      beforeSrc: currentOriginalExportSrc || currentOriginalImageSrc || before6m.src,
       afterSrc: img6m.src,
       timelineLabel: "6 Months",
       formatSelect: socialFormat6m,
@@ -1269,7 +1281,7 @@ generateSocial1y.addEventListener("click", async () => {
     setStatus("Creating your 1-year share image...");
     await renderSocialAsset({
       key: "oneYear",
-      beforeSrc: currentOriginalImageSrc || before1y.src,
+      beforeSrc: currentOriginalExportSrc || currentOriginalImageSrc || before1y.src,
       afterSrc: img1y.src,
       timelineLabel: "1 Year",
       formatSelect: socialFormat1y,
