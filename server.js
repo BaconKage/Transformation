@@ -5,6 +5,7 @@ import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
 import { handlePreviewRequest } from "./lib/preview-service.js";
+import { handlePhotoConvertRequest } from "./lib/photo-convert-service.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -25,6 +26,7 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }
 });
 app.post("/api/preview", upload.single("photo"), handlePreviewRequest);
+app.post("/api/convert-photo", upload.single("photo"), handlePhotoConvertRequest);
 
 if (!process.env.VERCEL) {
   app.listen(port, () => {

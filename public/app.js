@@ -417,6 +417,47 @@ function fileToDataUrl(file) {
   });
 }
 
+function isHeicFile(file) {
+  const type = (file?.type || "").toLowerCase();
+  const name = (file?.name || "").toLowerCase();
+  return type.includes("heic")
+    || type.includes("heif")
+    || name.endsWith(".heic")
+    || name.endsWith(".heif");
+}
+
+function dataUrlToFile(dataUrl, filename, mimeType = "image/jpeg") {
+  const [header, base64] = dataUrl.split(",");
+  if (!header || !base64) {
+    throw new Error("Converted photo response was invalid.");
+  }
+  const byteString = atob(base64);
+  const bytes = new Uint8Array(byteString.length);
+  for (let index = 0; index < byteString.length; index += 1) {
+    bytes[index] = byteString.charCodeAt(index);
+  }
+  return new File([bytes], filename, { type: mimeType });
+}
+
+async function convertHeicFile(file) {
+  const formData = new FormData();
+  formData.append("photo", file);
+  const response = await fetch("/api/convert-photo", {
+    method: "POST",
+    body: formData
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || !payload.image) {
+    throw new Error(payload.error || "Could not convert that HEIC photo.");
+  }
+  const mimeType = payload.mimeType || "image/jpeg";
+  const filename = payload.filename || file.name.replace(/\.(heic|heif)$/i, ".jpg") || "photo.jpg";
+  return {
+    dataUrl: payload.image,
+    file: dataUrlToFile(payload.image, filename, mimeType)
+  };
+}
+
 function canLoadImageSource(src) {
   return new Promise((resolve) => {
     const image = new Image();
@@ -447,6 +488,17 @@ async function normalizeImageFile(file) {
 async function buildPreviewSources(file) {
   if (!file || !file.size) {
     throw new Error("That photo file is empty. Try another image.");
+  }
+
+  if (isHeicFile(file)) {
+    setStatus("Converting HEIC photo...");
+    const converted = await convertHeicFile(file);
+    return {
+      displaySrc: converted.dataUrl,
+      exportSrc: converted.dataUrl,
+      fallbackSrc: "",
+      fileForUpload: converted.file
+    };
   }
 
   const objectUrl = URL.createObjectURL(file);
@@ -1202,6 +1254,10 @@ photoInput.addEventListener("change", async () => {
   try {
     const file = photoInput.files[0];
     const previewSources = await buildPreviewSources(file);
+    capturedPhotoFile = previewSources.fileForUpload || null;
+    if (capturedPhotoFile) {
+      photoInput.value = "";
+    }
     setPreview(previewSources.displaySrc, previewSources.exportSrc, previewSources.fallbackSrc);
     setStatus("Photo added.");
   } catch (error) {
