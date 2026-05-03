@@ -364,6 +364,14 @@ function setPreview(url) {
   currentPreviewUrl = url;
   currentOriginalImageSrc = url;
   currentOriginalExportSrc = url;
+  selectedPreview.classList.remove("is-loaded");
+  selectedPreview.onload = () => {
+    selectedPreview.classList.add("is-loaded");
+  };
+  selectedPreview.onerror = () => {
+    selectedPreview.classList.remove("is-loaded");
+    setStatus("Could not show that photo. Try uploading another image.", true);
+  };
   selectedPreview.src = url;
   previewWrap.classList.remove("hidden");
   form.classList.add("has-photo");
@@ -1098,9 +1106,8 @@ photoInput.addEventListener("change", async () => {
   await stopCamera();
   try {
     const file = photoInput.files[0];
-    const objectUrl = URL.createObjectURL(file);
-    setPreview(objectUrl);
-    currentOriginalExportSrc = await fileToDataUrl(file);
+    const dataUrl = await fileToDataUrl(file);
+    setPreview(dataUrl);
     setStatus("Photo added.");
   } catch (error) {
     setStatus(error.message || "Could not preview the selected photo.", true);
