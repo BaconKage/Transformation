@@ -357,13 +357,13 @@ function setLoading(isLoading, message = "Creating your transformation...") {
   }
 }
 
-function setPreview(url) {
+function setPreview(url, exportUrl = url) {
   if (currentPreviewUrl && currentPreviewUrl.startsWith("blob:")) {
     URL.revokeObjectURL(currentPreviewUrl);
   }
   currentPreviewUrl = url;
   currentOriginalImageSrc = url;
-  currentOriginalExportSrc = url;
+  currentOriginalExportSrc = exportUrl;
   selectedPreview.classList.remove("is-loaded");
   selectedPreview.onload = () => {
     selectedPreview.classList.add("is-loaded");
@@ -1106,8 +1106,19 @@ photoInput.addEventListener("change", async () => {
   await stopCamera();
   try {
     const file = photoInput.files[0];
-    const dataUrl = await fileToDataUrl(file);
-    setPreview(dataUrl);
+    const objectUrl = URL.createObjectURL(file);
+    setPreview(objectUrl);
+    fileToDataUrl(file)
+      .then((dataUrl) => {
+        if (currentPreviewUrl === objectUrl) {
+          currentOriginalExportSrc = dataUrl;
+        }
+      })
+      .catch(() => {
+        if (currentPreviewUrl === objectUrl) {
+          currentOriginalExportSrc = objectUrl;
+        }
+      });
     setStatus("Photo added.");
   } catch (error) {
     setStatus(error.message || "Could not preview the selected photo.", true);

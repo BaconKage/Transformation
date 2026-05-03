@@ -3520,6 +3520,7 @@ body {
   width: min(100%, 280px);
   max-width: 100%;
   height: auto;
+  min-height: 220px;
   max-height: min(38svh, 340px);
   margin: 0 auto;
   border: 0;
@@ -3639,6 +3640,7 @@ body {
 
   .photo-step .upload-preview img {
     width: min(100%, 220px);
+    min-height: 180px;
     max-height: 30svh;
     border-radius: 22px;
   }
