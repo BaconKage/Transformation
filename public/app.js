@@ -1217,9 +1217,13 @@ async function startCamera(facingMode) {
     video: { facingMode: { ideal: facingMode } },
     audio: false
   });
+  cameraFeed.setAttribute("playsinline", "");
+  cameraFeed.setAttribute("webkit-playsinline", "");
+  cameraFeed.muted = true;
   cameraFeed.srcObject = cameraStream;
   cameraWrap.classList.remove("hidden");
   form.classList.add("camera-active");
+  await cameraFeed.play().catch(() => {});
 }
 
 uploadBtn.addEventListener("click", () => {

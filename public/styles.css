@@ -3503,9 +3503,13 @@ body {
 }
 
 .intake-flow.camera-active[data-step="photo"] {
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr);
+  padding: clamp(0.65rem, 2vw, 1rem);
+  padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+  overflow: hidden;
 }
 
+.intake-flow.camera-active .flow-head,
 .intake-flow.camera-active .details-step,
 .intake-flow.camera-active .photo-topbar,
 .intake-flow.camera-active .photo-actions,
@@ -3533,8 +3537,8 @@ body {
   min-height: 0;
   max-height: none;
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
-  gap: var(--space-3);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 0;
   padding: 0;
   border: 0;
   background: transparent;
@@ -3543,9 +3547,10 @@ body {
 
 .intake-flow.camera-active #cameraFeed {
   width: min(100%, 430px);
-  height: min(58svh, 620px);
+  height: min(calc(100svh - 132px - env(safe-area-inset-bottom, 0px)), 640px);
   max-height: none;
   justify-self: center;
+  align-self: center;
   border: 1px solid rgba(245, 239, 230, 0.16);
   border-radius: 28px;
   object-fit: cover;
@@ -3556,11 +3561,21 @@ body {
 }
 
 .intake-flow.camera-active .camera-controls {
-  width: min(100%, 430px);
-  justify-self: center;
+  position: fixed;
+  z-index: 40;
+  left: max(0.85rem, env(safe-area-inset-left, 0px));
+  right: max(0.85rem, env(safe-area-inset-right, 0px));
+  bottom: calc(0.9rem + env(safe-area-inset-bottom, 0px));
+  width: auto;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   justify-items: center;
+  padding: 0.75rem;
+  border: 1px solid rgba(245, 239, 230, 0.12);
+  border-radius: 999px;
+  background: rgba(5, 5, 5, 0.78);
+  box-shadow: 0 18px 56px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(18px);
 }
 
 .intake-flow.camera-active .camera-controls button {
@@ -3597,6 +3612,12 @@ body {
 
 .intake-flow.camera-active .flow-actions {
   display: none !important;
+}
+
+@supports (height: 100dvh) {
+  .intake-flow.camera-active #cameraFeed {
+    height: min(calc(100dvh - 132px - env(safe-area-inset-bottom, 0px)), 640px);
+  }
 }
 
 .photo-step .upload-preview {
@@ -3756,10 +3777,7 @@ body {
 
   .intake-flow.camera-active {
     padding: var(--space-2);
-  }
-
-  .intake-flow.camera-active .flow-head {
-    display: none;
+    padding-bottom: calc(108px + env(safe-area-inset-bottom, 0px));
   }
 
   .intake-flow.camera-active[data-step="photo"] {
@@ -3768,22 +3786,30 @@ body {
 
   .intake-flow.camera-active #cameraFeed {
     width: min(100%, 420px);
-    height: calc(100svh - 8.5rem);
+    height: calc(100svh - 120px - env(safe-area-inset-bottom, 0px));
     border-radius: 24px;
   }
 
   .intake-flow.camera-active .camera-wrap {
-    gap: var(--space-2);
+    gap: 0;
   }
 
   .intake-flow.camera-active .camera-controls {
-    width: 100%;
     grid-template-columns: 1fr auto 1fr;
+    left: max(0.6rem, env(safe-area-inset-left, 0px));
+    right: max(0.6rem, env(safe-area-inset-right, 0px));
+    bottom: calc(0.7rem + env(safe-area-inset-bottom, 0px));
   }
 
   .intake-flow.camera-active #captureBtn {
     width: 72px;
     height: 72px;
+  }
+
+  @supports (height: 100dvh) {
+    .intake-flow.camera-active #cameraFeed {
+      height: calc(100dvh - 120px - env(safe-area-inset-bottom, 0px));
+    }
   }
 
   .details-step .profile-grid {
